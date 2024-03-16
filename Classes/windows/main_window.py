@@ -2,6 +2,7 @@
 from tkinter import *
 from tkinter import Tk
 from Classes.windows.register_window import RegisterWindow
+from Classes.windows.login_window import LogInWindow
 
 # Class for the main window
 class MainWindow:
@@ -35,4 +36,4 @@ class MainWindow:
         RegisterWindow()
     
     def open_window_login(self):
-        print('login')
+        LogInWindow()

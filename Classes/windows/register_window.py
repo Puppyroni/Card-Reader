@@ -29,14 +29,14 @@ class RegisterWindow:
         self.Password_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
         self.Password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
         
-        # Configure a button of rgister
-        self.login_btn = Button(self.register_window, text = 'Register', font = 'Arial 14', bg = 'cyan',
-                                command = self.register_user) # command missing
-        self.login_btn.grid(row = 4, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
+        # Configure a button of register
+        self.register_btn = Button(self.register_window, text = 'Register', font = 'Arial 14', bg = 'cyan',
+                                command = self.register_user)
+        self.register_btn.grid(row = 4, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
         
         # Configure a button of exit
         self.exit_btn = Button(self.register_window, text = 'Exit', font = 'Arial 14', bg = 'cyan', 
-                               command = self.register_window.destroy) # command missing
+                               command = self.register_window.destroy)
         self.exit_btn.grid(row = 5, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
       
       
