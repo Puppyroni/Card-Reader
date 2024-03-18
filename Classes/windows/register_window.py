@@ -43,8 +43,8 @@ class RegisterWindow:
         self.username_entry.grid(row = 1, column = 1, pady = 20, sticky = 'E')
         
         # Create field for password
-        self.Password_lbl = Label(self.register_window, text = 'Password', font = 'Arial 14 bold', bg = '#f0f0f0')
-        self.Password_lbl.grid(row = 2, column = 0, pady = 20, sticky = 'E')
+        self.password_lbl = Label(self.register_window, text = 'Password', font = 'Arial 14 bold', bg = '#f0f0f0')
+        self.password_lbl.grid(row = 2, column = 0, pady = 20, sticky = 'E')
         self.Password_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
         self.Password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
         

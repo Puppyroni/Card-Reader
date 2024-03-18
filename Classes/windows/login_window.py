@@ -3,6 +3,9 @@ from tkinter import *
 from tkinter import Tk
 from tkinter import PhotoImage
 from PIL import Image, ImageTk
+import sqlite3
+import hashlib
+import os
 
 # Placeholder so that the window works
 class LogInWindow:
@@ -41,10 +44,10 @@ class LogInWindow:
         self.username_entry.grid(row = 1, column = 1, pady = 20, sticky = 'E')
         
         # Create field for password
-        self.Password_lbl = Label(self.login_window, text = 'Password', font = 'Arial 14 bold', bg = '#f0f0f0')
-        self.Password_lbl.grid(row = 2, column = 0, pady = 20, sticky = 'E')
-        self.Password_entry = Entry(self.login_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
-        self.Password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
+        self.password_lbl = Label(self.login_window, text = 'Password', font = 'Arial 14 bold', bg = '#f0f0f0')
+        self.password_lbl.grid(row = 2, column = 0, pady = 20, sticky = 'E')
+        self.password_entry = Entry(self.login_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
+        self.password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
         
         # Configure a button of login
         self.register_btn = Button(self.login_window, text = 'LogIn', font = 'Arial 14', bg = 'cyan',
@@ -58,5 +61,34 @@ class LogInWindow:
     
         
     def login_user(self):
-        self.message_login_completed = Label(self.login_window, text = 'The Log In was Successful!', fg= 'green')
-        self.message_login_completed.grid(row = 3, column = 0, columnspan = 2)
+        # Get inserted data
+        entered_username = self.username_entry.get()
+        entered_password = self.password_entry.get()
+
+        # # Connect to a database 
+        conn = sqlite3.connect('temp.db')
+        cursor = conn.cursor()
+        
+        # Query the database to check if the entered username and password are correct
+        cursor.execute("SELECT * FROM user WHERE user=?", (entered_username,))
+        result = cursor.fetchone()
+
+        # Check if the entered username is present in the database
+        if result:
+            # Splits Salt and hash
+            saved_password = str(result[2])
+            salt, saved_password_hash = saved_password.split(':')
+                
+            # Hash the entered password using the same salt
+            hashed_password = hashlib.pbkdf2_hmac('sha256', entered_password.encode('utf-8'), bytes.fromhex(salt), 100000).hex()
+                
+            # Check if the entered password matches the stored hash
+            if hashed_password == saved_password_hash:
+            # If credentials are correct, display a success message
+                self.message_login_completed = Label(self.login_window, text='The Log In was Successful!', fg='green')
+                self.message_login_completed.grid(row=3, column=0, columnspan=2)
+                return
+                
+        # If credentials are incorrect, display an error message
+        self.message_login_failed = Label(self.login_window, text='Invalid username or password', fg='red')
+        self.message_login_failed.grid(row=3, column=0, columnspan=2)
