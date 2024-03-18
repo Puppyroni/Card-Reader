@@ -14,25 +14,23 @@ class MainWindow:
         self.main_window.title('Card Reader') # Change Tittle
         self.main_window.iconbitmap('Assets/icons/icon.ico') # Change icon
         self.main_window.configure(bg = '#f0f0f0') # Change the background color
-        
-        # Set width and height of the window 
-        # Off for now
-        #width = self.main_window.winfo_screenwidth()
-        #height = self.main_window.winfo_screenheight()
-        #alignstr = '%dx%d+0+0' % (width, height)
-        #self.main_window.geometry(alignstr)
 
-        # Create Image Background
-        # P: Cannat get the image to load idk know why
+        # Set the background image
         try:
-            image = Image.open("Assets/image/retrato-de-um-trabalhador-loiro-sorridente-tomando-um-legumes_13339-149292.jpg")
-            tk_image = ImageTk.PhotoImage(image)
-            image_lbl = Label(self.main_window, image=tk_image)
-            image_lbl.place(x=0, y=0)
+            pil_image = Image.open("Assets/image/MainBG.jpg")
+            
+            self.image = ImageTk.PhotoImage(pil_image)
+            img_lbl = Label(self.main_window, image=self.image)
+            img_lbl.place(x=0, y=0, relwidth=1, relheight=1)
         except FileNotFoundError:
             print("Arquivo de imagem não encontrado.")
         except TclError:
             print("Erro ao carregar a imagem. Verifique se o formato da imagem é suportado.")
+            
+        # Set and Lock window size to match image size
+        self.main_window.geometry(f"{pil_image.width}x{pil_image.height}")
+        self.main_window.minsize(pil_image.width, pil_image.height)
+        self.main_window.maxsize(pil_image.width, pil_image.height)
         
         # Configure a welcome text
         self.welcome_lbl = Label(self.main_window, text = 'Card Reader', font = 'Arial 20', bg = '#f0f0f0')
@@ -52,6 +50,7 @@ class MainWindow:
         self.exit_btn = Button(self.main_window, text = 'Exit', font = 'Arial 14', bg = 'cyan', 
                                command = self.main_window.destroy) # command missing
         self.exit_btn.grid(row = 3, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
+        
         
     def open_window_register(self):
         RegisterWindow()

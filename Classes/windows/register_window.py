@@ -1,6 +1,8 @@
 # imports
 from tkinter import *
 from tkinter import Tk
+from tkinter import PhotoImage
+from PIL import Image, ImageTk
 import sqlite3
 import hashlib
 import os
@@ -12,6 +14,23 @@ class RegisterWindow:
         self.register_window.title('Registry') # Change Tittle
         self.register_window.iconbitmap('Assets/icons/icon.ico') # Change icon
         self.register_window.configure(bg = '#f0f0f0') # Change the background color
+        
+                # Set the background image
+        try:
+            pil_image = Image.open("Assets/image/RegisterBG.jpg")
+            
+            self.image = ImageTk.PhotoImage(pil_image)
+            img_lbl = Label(self.register_window, image=self.image)
+            img_lbl.place(x=0, y=0, relwidth=1, relheight=1)
+        except FileNotFoundError:
+            print("Arquivo de imagem não encontrado.")
+        except TclError:
+            print("Erro ao carregar a imagem. Verifique se o formato da imagem é suportado.")
+            
+        # Set and Lock window size to match image size
+        self.register_window.geometry(f"{pil_image.width}x{pil_image.height}")
+        self.register_window.minsize(pil_image.width, pil_image.height)
+        self.register_window.maxsize(pil_image.width, pil_image.height)
         
         # Create resgister label
         self.register_lbl = Label(self.register_window, text = 'Registry', font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
