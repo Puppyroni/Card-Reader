@@ -1,6 +1,8 @@
 # imports
 from tkinter import *
 from tkinter import Tk
+from tkinter import PhotoImage
+from PIL import Image, ImageTk
 
 # Placeholder so that the window works
 class LogInWindow:
@@ -10,6 +12,23 @@ class LogInWindow:
         self.login_window.title('Log In') # Change Tittle
         self.login_window.iconbitmap('Assets/icons/icon.ico') # Change icon
         self.login_window.configure(bg = '#f0f0f0') # Change the background color
+        
+        # Set the background image
+        try:
+            pil_image = Image.open("Assets/image/MainBG.jpg") # Using same as the main window as placeholder for now
+            
+            self.image = ImageTk.PhotoImage(pil_image)
+            img_lbl = Label(self.login_window, image=self.image)
+            img_lbl.place(x=0, y=0, relwidth=1, relheight=1)
+        except FileNotFoundError:
+            print("Arquivo de imagem não encontrado.")
+        except TclError:
+            print("Erro ao carregar a imagem. Verifique se o formato da imagem é suportado.")
+            
+        # Set and Lock window size to match image size
+        self.login_window.geometry(f"{pil_image.width}x{pil_image.height}")
+        self.login_window.minsize(pil_image.width, pil_image.height)
+        self.login_window.maxsize(pil_image.width, pil_image.height)
         
         # Create login label
         self.register_lbl = Label(self.login_window, text = 'Log In', font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
