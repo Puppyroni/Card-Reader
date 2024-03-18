@@ -66,11 +66,11 @@ class LogInWindow:
         entered_password = self.password_entry.get()
 
         # # Connect to a database 
-        conn = sqlite3.connect('temp.db')
+        conn = sqlite3.connect('User_Data.db')
         cursor = conn.cursor()
         
         # Query the database to check if the entered username and password are correct
-        cursor.execute("SELECT * FROM user WHERE user=?", (entered_username,))
+        cursor.execute("SELECT * FROM funcionarios WHERE nome=?", (entered_username,))
         result = cursor.fetchone()
 
         # Check if the entered username is present in the database

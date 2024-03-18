@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import Tk
 from tkinter import PhotoImage
 from PIL import Image, ImageTk
+import sqlite3
 from Classes.windows.register_window import RegisterWindow
 from Classes.windows.login_window import LogInWindow
 
@@ -15,17 +16,28 @@ class MainWindow:
         self.main_window.iconbitmap('Assets/icons/icon.ico') # Change icon
         self.main_window.configure(bg = '#f0f0f0') # Change the background color
 
+        # Connect and save to a database
+        conn = sqlite3.connect('User_Data.db')
+        cursor = conn.cursor()
+        # Check the quary for a Super User
+        cursor.execute("SELECT * FROM funcionarios WHERE cargo='SuperUser'")
+        result = cursor.fetchone()
+        
+        # Check if Super User was not inserted
+        if not result:
+            RegisterWindow()
+        
         # Set the background image
         try:
-            pil_image = Image.open("Assets/image/MainBG.jpg")
+            pil_image = Image.open('Assets/image/MainBG.jpg')
             
             self.image = ImageTk.PhotoImage(pil_image)
             img_lbl = Label(self.main_window, image=self.image)
             img_lbl.place(x=0, y=0, relwidth=1, relheight=1)
         except FileNotFoundError:
-            print("Arquivo de imagem não encontrado.")
+            print('Arquivo de imagem não encontrado.')
         except TclError:
-            print("Erro ao carregar a imagem. Verifique se o formato da imagem é suportado.")
+            print('Erro ao carregar a imagem. Verifique se o formato da imagem é suportado.')
             
         # Set and Lock window size to match image size
         self.main_window.geometry(f"{pil_image.width}x{pil_image.height}")

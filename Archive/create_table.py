@@ -1,31 +1,77 @@
 import sqlite3
 
-# connect to a database
-conn = sqlite3.connect('temp.db')
+try:
+    # Connect to a database
+    conn = sqlite3.connect('User_Data.db')
 
-# Create a cursor
-cursor = conn.cursor()
+    # Create a cursor
+    cursor = conn.cursor()
 
-# Command SQL for creating a table
-# ID int PK
-# USER text not null unique
-# PASSWORD text not null
-create_table = '''
-    CREATE TABLE IF NOT EXISTS user(
-        id INTEGER PRIMARY KEY,
-        user TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL
-    )
-'''
+    # Command SQL for creating a table
+    """ put after testing and reworked registered logic
+        CREATE TABLE IF NOT EXISTS funcionarios(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome VARCHAR(100) NOT NULL,
+            password TEXT NOT NULL,
+            idade INTEGER NOT NULL,
+            morada VARCHAR(100) NOT NULL,
+            cargo VARCHAR(30) NOT NULL
+        );
+    """
+    create_table = '''
+        CREATE TABLE IF NOT EXISTS funcionarios(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome VARCHAR(100) NOT NULL,
+            password TEXT NOT NULL,
+            idade INTEGER,
+            morada VARCHAR(100),
+            cargo VARCHAR(30) DEFAULT 'Funcionario'
+        );
 
-# Execute the SQL command with cursor
-cursor.execute(create_table)
+        CREATE TABLE IF NOT EXISTS picagem_entrada (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_funcionario INTEGER NOT NULL,
+            picagem_data DATE NOT NULL,
+            hora_registro TIME NOT NULL,
+            FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id)
+        );
 
-# Save with the commit
-conn.commit()
+        CREATE TABLE IF NOT EXISTS picagem_saida (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_funcionario INTEGER NOT NULL,
+            picagem_data DATE NOT NULL,
+            hora_registro TIME NOT NULL,
+            FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id)
+        );
 
-# Close the connection
-conn.close()
+        CREATE TABLE IF NOT EXISTS picagem_entrada_pausa (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_funcionario INTEGER NOT NULL,
+            picagem_data DATE NOT NULL,
+            hora_registro TIME NOT NULL,
+            FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id)
+        );
 
-# Confirmation that the code has been successful at saving the data
-print('Saved Successfully!')
+        CREATE TABLE IF NOT EXISTS picagem_saida_pausa (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_funcionario INTEGER NOT NULL,
+            picagem_data DATE NOT NULL,
+            hora_registro TIME NOT NULL,
+            FOREIGN KEY (id_funcionario) REFERENCES funcionarios(id)
+        );
+    '''
+
+    # Execute the SQL command with cursor
+    cursor.executescript(create_table)
+
+    # Save with the commit
+    conn.commit()
+
+    # Close the connection
+    conn.close()
+
+    # Confirmation that the code has been successful at saving the data
+    print('Saved Successfully!')
+
+except sqlite3.Error as e:
+    print('SQLite error:', e)

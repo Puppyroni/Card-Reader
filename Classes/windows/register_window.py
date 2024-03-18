@@ -76,11 +76,26 @@ class RegisterWindow:
         
         # Now saving values
         password_saving = f'{salt_hex}:{password_hash_hex}'
+    
         
         # Connect and save to a database
-        conn = sqlite3.connect('temp.db')
+        conn = sqlite3.connect('User_Data.db')
         cursor = conn.cursor()
-        cursor.execute('INSERT INTO user (user, password) VALUES (?, ?)', (user_data, password_saving))
+        # Check the quary for a Super User
+        cursor.execute("SELECT * FROM funcionarios WHERE cargo='SuperUser'")
+        result = cursor.fetchone()
+        
+        # Check if Super User was inserted
+        if result:
+            cursor.execute('INSERT INTO funcionarios (nome, password) VALUES (?, ?)', (user_data, password_saving))
+        else:
+            cursor.execute('INSERT INTO funcionarios (nome, password, cargo) VALUES (?, ?, ?)', 
+                           (user_data, password_saving, 'SuperUser'))
+            # Message of successful registry
+            self.message_register_completed = Label(self.register_window, text = 'SuperUser!', fg= 'green')
+            self.message_register_completed.grid(row = 6, column = 0, columnspan = 2)
+        
+        # Commit and close the database
         conn.commit()     
         conn.close()
         
