@@ -1,13 +1,12 @@
 # imports
 from tkinter import *
-from tkinter import Tk
-from tkinter import PhotoImage
 from PIL import Image, ImageTk
 import sqlite3
 import hashlib
-import os
+# Windows
+from Classes.windows.program_window import ProgramWindow
 
-# Placeholder so that the window works
+
 class LogInWindow:
     def __init__(self):
         # Create the login window
@@ -34,8 +33,8 @@ class LogInWindow:
         self.login_window.maxsize(pil_image.width, pil_image.height)
         
         # Create login label
-        self.register_lbl = Label(self.login_window, text = 'Log In', font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
-        self.register_lbl.grid(row = 0, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
+        self.login_lbl = Label(self.login_window, text = 'Log In', font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
+        self.login_lbl.grid(row = 0, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
         
         # Create field for username
         self.username_lbl = Label(self.login_window, text = 'Username', font = 'Arial 14 bold', bg = '#f0f0f0')
@@ -50,9 +49,9 @@ class LogInWindow:
         self.password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
         
         # Configure a button of login
-        self.register_btn = Button(self.login_window, text = 'LogIn', font = 'Arial 14', bg = 'cyan',
+        self.login_btn = Button(self.login_window, text = 'LogIn', font = 'Arial 14', bg = 'cyan',
                                 command = self.login_user)
-        self.register_btn.grid(row = 4, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
+        self.login_btn.grid(row = 4, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
         
         # Configure a button of exit
         self.exit_btn = Button(self.login_window, text = 'Exit', font = 'Arial 14', bg = 'cyan', 
@@ -65,11 +64,11 @@ class LogInWindow:
         entered_username = self.username_entry.get()
         entered_password = self.password_entry.get()
 
-        # # Connect to a database 
+        # Connect to a database 
         conn = sqlite3.connect('User_Data.db')
         cursor = conn.cursor()
         
-        # Query the database to check if the entered username and password are correct
+        # Query the database to check if the entered username is correct
         cursor.execute("SELECT * FROM funcionarios WHERE nome=?", (entered_username,))
         result = cursor.fetchone()
 
@@ -87,8 +86,21 @@ class LogInWindow:
             # If credentials are correct, display a success message
                 self.message_login_completed = Label(self.login_window, text='The Log In was Successful!', fg='green')
                 self.message_login_completed.grid(row=3, column=0, columnspan=2)
+                self.message_login_completed.after(1000, self.open_window_program)
                 return
                 
         # If credentials are incorrect, display an error message
         self.message_login_failed = Label(self.login_window, text='Invalid username or password', fg='red')
         self.message_login_failed.grid(row=3, column=0, columnspan=2)
+        
+        # save and close the database
+        conn.commit()     
+        conn.close()
+        
+        
+    def open_window_program(self):
+        # Get the username inserted in the login window
+        entered_username = self.username_entry.get()
+        
+        # Pass the username to the other window
+        ProgramWindow(entered_username)

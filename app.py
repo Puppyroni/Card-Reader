@@ -1,4 +1,4 @@
-# Imports
+# Windows
 from Classes.windows.main_window import MainWindow
 
 # Function main

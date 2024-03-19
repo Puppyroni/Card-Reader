@@ -1,9 +1,9 @@
 # imports
 from tkinter import *
 from tkinter import Tk
-from tkinter import PhotoImage
 from PIL import Image, ImageTk
 import sqlite3
+# Windows
 from Classes.windows.register_window import RegisterWindow
 from Classes.windows.login_window import LogInWindow
 
@@ -19,13 +19,17 @@ class MainWindow:
         # Connect and save to a database
         conn = sqlite3.connect('User_Data.db')
         cursor = conn.cursor()
-        # Check the quary for a Super User
+        # Check the quary for a SuperUser
         cursor.execute("SELECT * FROM funcionarios WHERE cargo='SuperUser'")
         result = cursor.fetchone()
         
-        # Check if Super User was not inserted
+        # Check if SuperUser was not created
         if not result:
             RegisterWindow()
+            
+        # save and close the database
+        conn.commit()     
+        conn.close()
         
         # Set the background image
         try:
@@ -47,11 +51,6 @@ class MainWindow:
         # Configure a welcome text
         self.welcome_lbl = Label(self.main_window, text = 'Card Reader', font = 'Arial 20', bg = '#f0f0f0')
         self.welcome_lbl.grid(row = 0, column = 1, columnspan = 2, pady = 20)
-        
-        # Configure a button of register
-        self.register_btn = Button(self.main_window, text = 'Register', font = 'Arial 14', bg = 'cyan',
-                                   command = self.open_window_register) # command missing
-        self.register_btn.grid(row = 1, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
         
         # Configure a button of login
         self.login_btn = Button(self.main_window, text = 'Login', font = 'Arial 14', bg = 'cyan',

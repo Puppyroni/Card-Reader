@@ -8,16 +8,6 @@ try:
     cursor = conn.cursor()
 
     # Command SQL for creating a table
-    """ put after testing and reworked registered logic
-        CREATE TABLE IF NOT EXISTS funcionarios(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nome VARCHAR(100) NOT NULL,
-            password TEXT NOT NULL,
-            idade INTEGER NOT NULL,
-            morada VARCHAR(100) NOT NULL,
-            cargo VARCHAR(30) NOT NULL
-        );
-    """
     create_table = '''
         CREATE TABLE IF NOT EXISTS funcionarios(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +15,7 @@ try:
             password TEXT NOT NULL,
             idade INTEGER,
             morada VARCHAR(100),
-            cargo VARCHAR(30) DEFAULT 'Funcionario'
+            cargo VARCHAR(30) DEFAULT 'Funcionario' NOT NULL
         );
 
         CREATE TABLE IF NOT EXISTS picagem_entrada (

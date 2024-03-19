@@ -1,11 +1,10 @@
 # imports
 from tkinter import *
-from tkinter import Tk
-from tkinter import PhotoImage
 from PIL import Image, ImageTk
 import sqlite3
 import hashlib
 import os
+
 
 class RegisterWindow:
     def __init__(self):
@@ -15,7 +14,7 @@ class RegisterWindow:
         self.register_window.iconbitmap('Assets/icons/icon.ico') # Change icon
         self.register_window.configure(bg = '#f0f0f0') # Change the background color
         
-                # Set the background image
+        # Set the background image
         try:
             pil_image = Image.open("Assets/image/RegisterBG.jpg")
             
@@ -45,24 +44,73 @@ class RegisterWindow:
         # Create field for password
         self.password_lbl = Label(self.register_window, text = 'Password', font = 'Arial 14 bold', bg = '#f0f0f0')
         self.password_lbl.grid(row = 2, column = 0, pady = 20, sticky = 'E')
-        self.Password_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
-        self.Password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
+        self.password_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
+        self.password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
         
+        # Create field for age [Make it not show on first creation of superuser]
+        self.age_lbl = Label(self.register_window, text = 'Age', font = 'Arial 14 bold', bg = '#f0f0f0')
+        self.age_lbl.grid(row = 3, column = 0, pady = 20, sticky = 'E')
+        self.age_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
+        self.age_entry.grid(row = 3, column = 1, pady = 20, sticky = 'E')
+            
+        # Create field for address
+        self.address_lbl = Label(self.register_window, text = 'Address', font = 'Arial 14 bold', bg = '#f0f0f0')
+        self.address_lbl.grid(row = 4, column = 0, pady = 20, sticky = 'E')
+        self.address_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
+        self.address_entry.grid(row = 4, column = 1, pady = 20, sticky = 'E')
+        
+        # Create field for job
+        self.job_lbl = Label(self.register_window, text = 'Job', font = 'Arial 14 bold', bg = '#f0f0f0')
+        self.job_lbl.grid(row = 5, column = 0, pady = 20, sticky = 'E')
+        self.job_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
+        self.job_entry.grid(row = 5, column = 1, pady = 20, sticky = 'E')
+        
+        # Connect to a database
+        conn = sqlite3.connect('User_Data.db')
+        cursor = conn.cursor()
+        # Check the quary for a SuperUser
+        username = self.username_entry.get()
+        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser'", (username,))
+        result_superuser = cursor.fetchone()
+        
+        # Check if the entered username is a SuperUser or a Admin
+        if result_superuser:
+            # Allow ability to Create Admins, Chiefs and Workers
+            self.temp_lbl = Label(self.register_window, text = 'Can create Admin', font = 'Arial 14 bold', bg = '#f0f0f0')
+            self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
+        
+        # Check the quary for a Chefe 
+        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Chefe'", (username,))
+        result_chief = cursor.fetchone()
+        
+        # Check if the entered username is a SuperUser or a Admin
+        if result_chief:
+            # Allow ability to Create workers
+            self.temp_lbl = Label(self.register_window, text = 'Can create Workers but not other Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
+            self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
+            
+        # save and close the database
+        conn.commit()     
+        conn.close()
+            
         # Configure a button of register
         self.register_btn = Button(self.register_window, text = 'Register', font = 'Arial 14', bg = 'cyan',
                                 command = self.register_user)
-        self.register_btn.grid(row = 4, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
+        self.register_btn.grid(row = 7, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
         
         # Configure a button of exit
         self.exit_btn = Button(self.register_window, text = 'Exit', font = 'Arial 14', bg = 'cyan', 
                                command = self.register_window.destroy)
-        self.exit_btn.grid(row = 5, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
+        self.exit_btn.grid(row = 8, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
       
       
     def register_user(self):
         # Get inserted data
         user_data = self.username_entry.get()
-        password_data = self.Password_entry.get()
+        password_data = self.password_entry.get()
+        age_data = self.age_entry.get()
+        address_data = self.address_entry.get()
+        job_data = self.job_entry.get()
         
         # Generate value of salt
         salt = os.urandom(16)
@@ -78,30 +126,34 @@ class RegisterWindow:
         password_saving = f'{salt_hex}:{password_hash_hex}'
     
         
-        # Connect and save to a database
+        # Connect to a database
         conn = sqlite3.connect('User_Data.db')
         cursor = conn.cursor()
         # Check the quary for a Super User
         cursor.execute("SELECT * FROM funcionarios WHERE cargo='SuperUser'")
         result = cursor.fetchone()
         
-        # Check if Super User was inserted
+        # Check if SuperUser was inserted
         if result:
-            cursor.execute('INSERT INTO funcionarios (nome, password) VALUES (?, ?)', (user_data, password_saving))
+            # Insert a user
+            cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo) VALUES (?, ?, ?, ?, ?)', 
+                           (user_data, password_saving, age_data, address_data, job_data))
         else:
-            cursor.execute('INSERT INTO funcionarios (nome, password, cargo) VALUES (?, ?, ?)', 
-                           (user_data, password_saving, 'SuperUser'))
+            # Insert a superuser
+            cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo) VALUES (?, ?, ?, ?, ?)', 
+                           (user_data, password_saving, age_data, address_data, 'SuperUser'))
+            
             # Message of successful registry
             self.message_register_completed = Label(self.register_window, text = 'SuperUser!', fg= 'green')
-            self.message_register_completed.grid(row = 6, column = 0, columnspan = 2)
+            self.message_register_completed.grid(row = 9, column = 0, columnspan = 2)
         
-        # Commit and close the database
+        # save and close the database
         conn.commit()     
         conn.close()
         
         # Message of successful registry
         self.message_register_completed = Label(self.register_window, text = 'The Registry was Successful!', fg= 'green')
-        self.message_register_completed.grid(row = 3, column = 0, columnspan = 2)
+        self.message_register_completed.grid(row = 6, column = 0, columnspan = 2)
         self.message_register_completed.after(3000, self.register_window.destroy)
         
         
