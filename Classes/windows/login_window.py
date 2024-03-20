@@ -90,8 +90,8 @@ class LogInWindow:
                 return
                 
         # If credentials are incorrect, display an error message
-        self.message_login_failed = Label(self.login_window, text='Invalid username or password', fg='red')
-        self.message_login_failed.grid(row=3, column=0, columnspan=2)
+        self.message_login_completed = Label(self.login_window, text='Invalid username or password', fg='red')
+        self.message_login_completed.grid(row=3, column=0, columnspan=2)
         
         # save and close the database
         conn.commit()     
