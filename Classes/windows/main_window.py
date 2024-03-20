@@ -16,7 +16,6 @@ class MainWindow:
         self.main_window.iconbitmap('Assets/icons/icon.ico') # Change icon
         self.main_window.configure(bg = '#f0f0f0') # Change the background color
         
-        
 
         # Connect and save to a database
         conn = sqlite3.connect('User_Data.db')

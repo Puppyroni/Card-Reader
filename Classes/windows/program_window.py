@@ -13,6 +13,7 @@ class ProgramWindow:
         self.program_window.iconbitmap('Assets/icons/icon.ico')
         self.program_window.configure(bg='#f0f0f0')
         
+        
         # Connect to a database
         conn = sqlite3.connect('User_Data.db')
         cursor = conn.cursor()

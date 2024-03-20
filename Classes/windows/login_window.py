@@ -15,6 +15,7 @@ class LogInWindow:
         self.login_window.iconbitmap('Assets/icons/icon.ico') # Change icon
         self.login_window.configure(bg = '#f0f0f0') # Change the background color
         
+        
         # Set the background image
         try:
             pil_image = Image.open("Assets/image/Design sem nome.jpg")
