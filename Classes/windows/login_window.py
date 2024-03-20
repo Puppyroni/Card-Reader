@@ -27,36 +27,43 @@ class LogInWindow:
         except TclError:
             print("Erro ao carregar a imagem. Verifique se o formato da imagem é suportado.")
             
-        # Set and Lock window size to match image size
-        self.login_window.geometry(f"{pil_image.width}x{pil_image.height}")
-        self.login_window.minsize(pil_image.width, pil_image.height)
-        self.login_window.maxsize(pil_image.width, pil_image.height)
-        
         # Create login label
-        self.login_lbl = Label(self.login_window, text = 'Log In', font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
-        self.login_lbl.grid(row = 0, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
+        self.login_lbl = Label(self.login_window, text='Log In', font='Arial 20', fg='#333333', bg='#f0f0f0')
+        self.login_lbl.grid(row=1, column=0, columnspan=2, pady=20, sticky='NSEW')
         
         # Create field for username
-        self.username_lbl = Label(self.login_window, text = 'Username', font = 'Arial 14 bold', bg = '#f0f0f0')
-        self.username_lbl.grid(row = 1, column = 0, pady = 20, sticky = 'E')
-        self.username_entry = Entry(self.login_window, font = 'Arial 14 bold', bg = '#f0f0f0')
-        self.username_entry.grid(row = 1, column = 1, pady = 20, sticky = 'E')
+        self.username_lbl = Label(self.login_window, text='Username', font='Arial 14 bold', bg='#f0f0f0')
+        self.username_lbl.grid(row=2, column=0, pady=20, sticky='E')
+        self.username_entry = Entry(self.login_window, font='Arial 14 bold', bg='#f0f0f0')
+        self.username_entry.grid(row=2, column=1, pady=20, sticky='E')
         
         # Create field for password
-        self.password_lbl = Label(self.login_window, text = 'Password', font = 'Arial 14 bold', bg = '#f0f0f0')
-        self.password_lbl.grid(row = 2, column = 0, pady = 20, sticky = 'E')
-        self.password_entry = Entry(self.login_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
-        self.password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
+        self.password_lbl = Label(self.login_window, text='Password', font='Arial 14 bold', bg='#f0f0f0')
+        self.password_lbl.grid(row=3, column=0, pady=20, sticky='E')
+        self.password_entry = Entry(self.login_window, font='Arial 14 bold', bg='#f0f0f0', show='*')
+        self.password_entry.grid(row=3, column=1, pady=20, sticky='E')
         
         # Configure a button of login
-        self.login_btn = Button(self.login_window, text = 'LogIn', font = 'Arial 14', bg = 'cyan',
-                                command = self.login_user)
-        self.login_btn.grid(row = 4, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
+        self.login_btn = Button(self.login_window, text='LogIn', font='Arial 14', bg='cyan',
+                                command=self.login_user)
+        self.login_btn.grid(row=4, column=0, columnspan=2, pady=10, sticky='NSEW')
         
         # Configure a button of exit
-        self.exit_btn = Button(self.login_window, text = 'Exit', font = 'Arial 14', bg = 'cyan', 
-                               command = self.login_window.destroy)
-        self.exit_btn.grid(row = 5, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
+        self.exit_btn = Button(self.login_window, text='Exit', font='Arial 14', bg='cyan', 
+                               command=self.login_window.destroy)
+        self.exit_btn.grid(row=5, column=0, columnspan=2, pady=10, sticky='NSEW')
+        
+        # Centralize all widgets
+        self.centralize_widgets()
+        
+    def centralize_widgets(self):
+        # Center the login window on the screen
+        self.login_window.update_idletasks()
+        width = self.login_window.winfo_width()
+        height = self.login_window.winfo_height()
+        x = (self.login_window.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.login_window.winfo_screenheight() // 2) - (height // 2)
+        self.login_window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
     
         
     def login_user(self):
