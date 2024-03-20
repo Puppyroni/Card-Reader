@@ -1,47 +1,99 @@
-# imports
 from tkinter import *
+from datetime import datetime, timedelta
 import sqlite3
-# Windows
 from Classes.windows.register_window import RegisterWindow
-
 
 class ProgramWindow:
     def __init__(self, username):
+        self.username = username  # Armazenar o nome de usuário como atributo da instância
+        
         # Create the main window
-        self.program_window = Toplevel() # Create window
-        self.program_window.title('Program') # Change Tittle
-        self.program_window.iconbitmap('Assets/icons/icon.ico') # Change icon
-        self.program_window.configure(bg = '#f0f0f0') # Change the background color
+        self.program_window = Toplevel()
+        self.program_window.title('Program')
+        self.program_window.iconbitmap('Assets/icons/icon.ico')
+        self.program_window.configure(bg='#f0f0f0')
         
         # Connect to a database
         conn = sqlite3.connect('User_Data.db')
         cursor = conn.cursor()
-        # Check the quary for a inserted username from login
+        
+        # Check the query for an inserted username from login
         cursor.execute("SELECT * FROM funcionarios WHERE nome=?", (username,))
         result_user = cursor.fetchone()
         
         # Create info field
-        self.name_lbl = Label(self.program_window, text = result_user[1], font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
-        self.name_lbl.grid(row = 0, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
-        self.job_lbl = Label(self.program_window, text = result_user[5], font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
-        self.job_lbl.grid(row = 1, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
+        self.name_lbl = Label(self.program_window, text=result_user[1], font='Arial 20', fg='#333333', bg='#f0f0f0')
+        self.name_lbl.grid(row=0, column=0, columnspan=2, pady=20, sticky='NSEW')
+        self.job_lbl = Label(self.program_window, text=result_user[5], font='Arial 20', fg='#333333', bg='#f0f0f0')
+        self.job_lbl.grid(row=1, column=0, columnspan=2, pady=20, sticky='NSEW')
         
-        # Check the quary for a SuperUser, Admin or Chief
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser' or cargo='Admin' or cargo='Chefe'", 
+        # Check the query for a SuperUser, Admin, or Chief
+        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND (cargo='SuperUser' or cargo='Admin' or cargo='Chefe')", 
                        (username,))
         result_job = cursor.fetchone()
         
-        # Check if the entered username is a SuperUser or a Admin
+        # Check if the entered username is a SuperUser or an Admin
         if result_job:
-            # Configure a button of register
-            self.register_btn = Button(self.program_window, text = 'Register', font = 'Arial 14', bg = 'cyan',
-                                    command = self.open_window_register) # command missing
-            self.register_btn.grid(row = 2, column = 1, columnspan = 2, padx = 20, pady = 10)
+            # Configure buttons for actions
+            self.enter_btn = Button(self.program_window, text='Entrar', font='Arial 14', bg='cyan', command=self.enter_action)
+            self.enter_btn.grid(row=2, column=0, padx=20, pady=10)
+            
+            # Create label for displaying entry time
+            self.entry_time_lbl = Label(self.program_window, text='', font='Arial 14', bg='#f0f0f0')
+            self.entry_time_lbl.grid(row=2, column=1, padx=20, pady=10)
+            
+            self.pause_btn = Button(self.program_window, text='Pausa', font='Arial 14', bg='cyan', command=self.pause_action)
+            self.pause_btn.grid(row=3, column=0, padx=20, pady=10)
+            
+            self.resume_btn = Button(self.program_window, text='Voltar da Pausa', font='Arial 14', bg='cyan', command=self.resume_action)
+            self.resume_btn.grid(row=3, column=1, padx=20, pady=10)
+            
+            self.exit_btn = Button(self.program_window, text='Sair do Trabalho', font='Arial 14', bg='cyan', command=self.exit_action)
+            self.exit_btn.grid(row=4, column=0, columnspan=2, padx=20, pady=10)
+            
+            # Create label for displaying current system time
+            self.clock_lbl = Label(self.program_window, text='', font='Arial 14', bg='#f0f0f0')
+            self.clock_lbl.grid(row=5, column=0, columnspan=2, pady=10)
+            
+            # Update clock label every second
+            self.update_clock()
+            
+    def enter_action(self):
+        # Get current time
+        current_time = datetime.now().strftime('%H:%M:%S')
+        # Display entry time and message
+        self.entry_time_lbl.config(text=f'Entrada: {current_time}\nBom trabalho!')
         
-        # Connect to a database 
-        conn = sqlite3.connect('User_Data.db')
-        cursor = conn.cursor()
-        
-        
-    def open_window_register(self):
-        RegisterWindow()
+    def pause_action(self):
+        self.pause_start_time = datetime.now()
+
+        # Exibir mensagem para o funcionário
+        current_time = self.pause_start_time.strftime('%H:%M:%S')
+        self.entry_time_lbl.config(text=f'Pausa iniciada: {current_time}\nBom almoço!')
+
+        # Registrar no sistema do gerente
+        self.log_manager(f'{self.username} iniciou a pausa às {current_time}')
+    
+    def resume_action(self):
+        # Calcular a duração da pausa
+        pause_duration = datetime.now() - self.pause_start_time
+        pause_duration_str = str(timedelta(seconds=pause_duration.seconds))
+
+        # Exibir mensagem para o funcionário
+        current_time = datetime.now().strftime('%H:%M:%S')
+        self.entry_time_lbl.config(text=f'Voltou da Pausa: {current_time}\nDuração da Pausa: {pause_duration_str}')
+
+        # Registrar no sistema do gerente
+        self.log_manager(f'{self.username} voltou da pausa às {current_time}. Duração da pausa: {pause_duration_str}')
+    
+    def exit_action(self):
+        # Implement the action for "Sair do Trabalho"
+        pass
+    
+    def update_clock(self):
+        # Get current system time
+        current_time = datetime.now().strftime('%H:%M:%S')
+        # Update clock label
+        self.clock_lbl.config(text=f'Hora atual: {current_time}')
+        # Schedule next update after 1000ms (1 second)
+        self.program_window.after(1000, self.update_clock)
