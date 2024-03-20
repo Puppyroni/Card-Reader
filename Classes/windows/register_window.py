@@ -14,6 +14,7 @@ class RegisterWindow:
         self.register_window.iconbitmap('Assets/icons/icon.ico') # Change icon
         self.register_window.configure(bg = '#f0f0f0') # Change the background color
         
+        
         # Set the background image
         try:
             pil_image = Image.open("Assets/image/RegisterBG.jpg")

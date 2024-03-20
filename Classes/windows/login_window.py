@@ -17,7 +17,7 @@ class LogInWindow:
         
         # Set the background image
         try:
-            pil_image = Image.open("Assets/image/MainBG.jpg") # Using same as the main window as placeholder for now
+            pil_image = Image.open("Assets/image/Design sem nome.jpg") # Using same as the main window as placeholder for now
             
             self.image = ImageTk.PhotoImage(pil_image)
             img_lbl = Label(self.login_window, image=self.image)
