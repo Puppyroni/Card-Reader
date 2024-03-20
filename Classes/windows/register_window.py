@@ -32,7 +32,7 @@ class RegisterWindow:
         self.register_window.maxsize(pil_image.width, pil_image.height)
         
         # Create resgister label
-        self.register_lbl = Label(self.register_window, text = 'Registry', font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
+        self.register_lbl = Label(self.register_window, text = 'Set Super User', font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
         self.register_lbl.grid(row = 0, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
         
         # Create field for username
@@ -47,36 +47,59 @@ class RegisterWindow:
         self.password_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
         self.password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
         
-        # Create field for age [Make it not show on first creation of superuser]
-        self.age_lbl = Label(self.register_window, text = 'Age', font = 'Arial 14 bold', bg = '#f0f0f0')
-        self.age_lbl.grid(row = 3, column = 0, pady = 20, sticky = 'E')
-        self.age_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
-        self.age_entry.grid(row = 3, column = 1, pady = 20, sticky = 'E')
-            
-        # Create field for address
-        self.address_lbl = Label(self.register_window, text = 'Address', font = 'Arial 14 bold', bg = '#f0f0f0')
-        self.address_lbl.grid(row = 4, column = 0, pady = 20, sticky = 'E')
-        self.address_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
-        self.address_entry.grid(row = 4, column = 1, pady = 20, sticky = 'E')
-        
-        # Create field for job
-        self.job_lbl = Label(self.register_window, text = 'Job', font = 'Arial 14 bold', bg = '#f0f0f0')
-        self.job_lbl.grid(row = 5, column = 0, pady = 20, sticky = 'E')
-        self.job_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
-        self.job_entry.grid(row = 5, column = 1, pady = 20, sticky = 'E')
-        
         # Connect to a database
         conn = sqlite3.connect('User_Data.db')
         cursor = conn.cursor()
-        # Check the quary for a SuperUser
+        
+        # Get Inserted Username
         username = self.username_entry.get()
+        
+        # Check the quary for a SuperUser, Admin or Chief
+        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser' or cargo='Admin' or cargo='Chefe'", 
+                       (username,))
+        self.result_extra_reg = cursor.fetchone()
+        
+        if self.result_extra_reg:
+            # Create resgister label
+            self.register_lbl = Label(self.register_window, text = 'Registry', font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
+            self.register_lbl.grid(row = 0, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
+            
+            # Create field for age [Make it not show on first creation of superuser]
+            self.age_lbl = Label(self.register_window, text = 'Age', font = 'Arial 14 bold', bg = '#f0f0f0')
+            self.age_lbl.grid(row = 3, column = 0, pady = 20, sticky = 'E')
+            self.age_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
+            self.age_entry.grid(row = 3, column = 1, pady = 20, sticky = 'E')
+                
+            # Create field for address
+            self.address_lbl = Label(self.register_window, text = 'Address', font = 'Arial 14 bold', bg = '#f0f0f0')
+            self.address_lbl.grid(row = 4, column = 0, pady = 20, sticky = 'E')
+            self.address_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
+            self.address_entry.grid(row = 4, column = 1, pady = 20, sticky = 'E')
+            
+            # Create field for job
+            self.job_lbl = Label(self.register_window, text = 'Job', font = 'Arial 14 bold', bg = '#f0f0f0')
+            self.job_lbl.grid(row = 5, column = 0, pady = 20, sticky = 'E')
+            self.job_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
+            self.job_entry.grid(row = 5, column = 1, pady = 20, sticky = 'E')
+        
+        # Check the quary for a SuperUser
         cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser'", (username,))
         result_superuser = cursor.fetchone()
         
         # Check if the entered username is a SuperUser or a Admin
         if result_superuser:
             # Allow ability to Create Admins, Chiefs and Workers
-            self.temp_lbl = Label(self.register_window, text = 'Can create Admin', font = 'Arial 14 bold', bg = '#f0f0f0')
+            self.temp_lbl = Label(self.register_window, text = 'Can create Admin, Workers and Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
+            self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
+            
+        # Check the quary for a Admin 
+        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Admin'", (username,))
+        result_admin = cursor.fetchone()
+        
+        # Check if the entered username is a SuperUser or a Admin
+        if result_admin:
+            # Allow ability to Create workers
+            self.temp_lbl = Label(self.register_window, text = 'Can create Workers and Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
             self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
         
         # Check the quary for a Chefe 
@@ -108,9 +131,14 @@ class RegisterWindow:
         # Get inserted data
         user_data = self.username_entry.get()
         password_data = self.password_entry.get()
-        age_data = self.age_entry.get()
-        address_data = self.address_entry.get()
-        job_data = self.job_entry.get()
+        age_data = ''
+        address_data = ''
+        job_data = ''
+        
+        if self.result_extra_reg:
+            age_data = self.age_entry.get()
+            address_data = self.address_entry.get()
+            job_data = self.job_entry.get()
         
         # Generate value of salt
         salt = os.urandom(16)

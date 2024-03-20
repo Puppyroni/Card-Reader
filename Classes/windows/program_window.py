@@ -26,7 +26,7 @@ class ProgramWindow:
         self.job_lbl = Label(self.program_window, text = result_user[5], font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
         self.job_lbl.grid(row = 1, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
         
-        # Check the quary for a SuperUser or Admin
+        # Check the quary for a SuperUser, Admin or Chief
         cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser' or cargo='Admin' or cargo='Chefe'", 
                        (username,))
         result_job = cursor.fetchone()
