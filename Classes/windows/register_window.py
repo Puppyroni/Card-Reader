@@ -80,18 +80,15 @@ class RegisterWindow:
             self.job_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0')
             self.job_entry.grid(row = 5, column = 1, pady = 20, sticky = 'E')
         
-        # save and close the database
-        conn.commit()     
+        # Close the database    
         conn.close()
             
         # Configure a button of register
-        self.register_btn = Button(self.register_window, text = 'Register', font = 'Arial 14', bg = 'cyan',
-                                command = self.register_user)
+        self.register_btn = Button(self.register_window, text = 'Register', font = 'Arial 14', bg = 'cyan', command = self.register_user)
         self.register_btn.grid(row = 7, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
         
         # Configure a button of exit
-        self.exit_btn = Button(self.register_window, text = 'Exit', font = 'Arial 14', bg = 'cyan', 
-                               command = self.register_window.destroy)
+        self.exit_btn = Button(self.register_window, text = 'Exit', font = 'Arial 14', bg = 'cyan', command = self.register_window.destroy)
         self.exit_btn.grid(row = 8, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
       
       
@@ -118,8 +115,8 @@ class RegisterWindow:
         salt_hex = salt.hex()
         password_hash_hex = password_hash.hex()
         
-        # Now saving values
-        password_saving = f'{salt_hex}:{password_hash_hex}'
+        # Combine Hashed password with salt
+        password_set = f'{salt_hex}:{password_hash_hex}'
     
         
         # Connect to a database
@@ -133,13 +130,13 @@ class RegisterWindow:
         if result:
             # Insert a user
             cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo) VALUES (?, ?, ?, ?, ?)', 
-                           (user_data, password_saving, age_data, address_data, job_data))
+                           (user_data, password_set, age_data, address_data, job_data))
         else:
             # Insert a superuser
             cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo) VALUES (?, ?, ?, ?, ?)', 
-                           (user_data, password_saving, age_data, address_data, 'SuperUser'))
+                           (user_data, password_set, age_data, address_data, 'SuperUser'))
             
-            # Message of successful registry
+            # Message of successful SuperUser registry
             self.message_register_completed = Label(self.register_window, text = 'SuperUser!', fg= 'green')
             self.message_register_completed.grid(row = 9, column = 0, columnspan = 2)
         
@@ -147,7 +144,7 @@ class RegisterWindow:
         conn.commit()     
         conn.close()
         
-        # Message of successful registry
+        # Message of successful User registry
         self.message_register_completed = Label(self.register_window, text = 'The Registry was Successful!', fg= 'green')
         self.message_register_completed.grid(row = 6, column = 0, columnspan = 2)
         self.message_register_completed.after(3000, self.register_window.destroy)

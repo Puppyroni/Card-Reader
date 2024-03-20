@@ -36,24 +36,22 @@ class ProgramWindow:
         self.job_lbl.grid(row = 3, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
         
         # Check the query for a SuperUser, Admin, or Chief
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND (cargo='SuperUser' or cargo='Admin' or cargo='Chefe')", 
-                       (username,))
+        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND (cargo='SuperUser' or cargo='Admin' or cargo='Chefe')", (username,))
         result_job = cursor.fetchone()
         
-        # Check if the entered username is a SuperUser or an Admin
+        # Check if the entered username is a SuperUser
         if result_job:
             # Configure a button of register
-            self.register_btn = Button(self.program_window, text = 'Register', font = 'Arial 14', bg = 'cyan',
-                                    command = self.open_window_register) # command missing
+            self.register_btn = Button(self.program_window, text = 'Register', font = 'Arial 14', bg = 'cyan', command = self.open_window_register)
             self.register_btn.grid(row = 4, column = 1, columnspan = 2, padx = 20, pady = 10)
             
-                # Check the quary for a SuperUser
+        # Check the quary for a SuperUser
         cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser'", (username,))
         result_superuser = cursor.fetchone()
         
-        # Check if the entered username is a SuperUser or a Admin
+        # Check if the entered username is a SuperUser
         if result_superuser:
-            # Allow ability to Create Admins, Chiefs and Workers
+            # Allow ability to Create Admins, Chefes and Workers
             self.temp_lbl = Label(self.program_window, text = 'Can create Admin, Workers and Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
             self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
             
@@ -61,11 +59,24 @@ class ProgramWindow:
         cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Admin'", (username,))
         result_admin = cursor.fetchone()
         
-        # Check if the entered username is a SuperUser or a Admin
+        # Check if the entered username is a a Admin
         if result_admin:
-            # Allow ability to Create workers
+            # Allow ability to Create workers and Chefes
             self.temp_lbl = Label(self.program_window, text = 'Can create Workers and Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
             self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
+            
+        # Check the quary for a Chefe 
+        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Chefe'", (username,))
+        result_chief = cursor.fetchone()
+        
+        # Check if the entered username is a Chefe
+        if result_chief:
+            # Allow ability to Create workers
+            self.temp_lbl = Label(self.program_window, text = 'Can create Workers but not other Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
+            self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
+            
+        # Close the database   
+        conn.close()
             
         # Configure buttons for actions
         self.enter_btn = Button(self.program_window, text='Entrar', font='Arial 14', bg='cyan', command=self.enter_action)
@@ -94,27 +105,15 @@ class ProgramWindow:
         # Update clock label every second
         self.update_clock()
         
-        # Check the quary for a Chefe 
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Chefe'", (username,))
-        result_chief = cursor.fetchone()
-        
-        # Check if the entered username is a SuperUser or a Admin
-        if result_chief:
-            # Allow ability to Create workers
-            self.temp_lbl = Label(self.program_window, text = 'Can create Workers but not other Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
-        
-        # Connect to a database 
-        conn = sqlite3.connect('User_Data.db')
-        cursor = conn.cursor()
-        
         
     def open_window_register(self):
-        # Get the username inserted in the login window
+        # Get the username label text in the login window
         username = self.name_lbl.cget('text')
         
+         # Pass the username to the other window
         RegisterWindow(username)
             
+    # A: Data is not being added to the database for now
     def enter_action(self):
         # Get current time
         current_time = datetime.now().strftime('%H:%M:%S')
@@ -142,7 +141,7 @@ class ProgramWindow:
 
         # Registrar no sistema do gerente 
         self.log_manager(f'{self.username} voltou da pausa às {current_time}. Duração da pausa: {pause_duration_str}')
-        #    ^^^^^^^^^^^  E: AttributeError: 'ProgramWindow' object has no attribute 'log_manager'
+        #    ^  E: AttributeError: 'ProgramWindow' object has no attribute 'log_manager'
     
     def exit_action(self):
         # Implement the action for "Sair do Trabalho"
@@ -151,7 +150,9 @@ class ProgramWindow:
     def update_clock(self):
         # Get current system time
         current_time = datetime.now().strftime('%H:%M:%S')
+        
         # Update clock label
         self.clock_lbl.config(text=f'Hora atual: {current_time}')
+        
         # Schedule next update after 1000ms (1 second)
         self.program_window.after(1000, self.update_clock)

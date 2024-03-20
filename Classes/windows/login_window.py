@@ -17,7 +17,7 @@ class LogInWindow:
         
         # Set the background image
         try:
-            pil_image = Image.open("Assets/image/Design sem nome.jpg") # Using same as the main window as placeholder for now
+            pil_image = Image.open("Assets/image/Design sem nome.jpg")
             
             self.image = ImageTk.PhotoImage(pil_image)
             img_lbl = Label(self.login_window, image=self.image)
@@ -56,6 +56,7 @@ class LogInWindow:
         # Centralize all widgets
         self.centralize_widgets()
         
+    
     def centralize_widgets(self):
         # Center the login window on the screen
         self.login_window.update_idletasks()
@@ -95,14 +96,13 @@ class LogInWindow:
                 self.message_login_completed.grid(row=3, column=0, columnspan=2)
                 self.message_login_completed.after(1000, self.open_window_program)
                 return
-                
+        
+        # Close the database   
+        conn.close()
+        
         # If credentials are incorrect, display an error message
         self.message_login_completed = Label(self.login_window, text='Invalid username or password', fg='red')
         self.message_login_completed.grid(row=3, column=0, columnspan=2)
-        
-        # save and close the database
-        conn.commit()     
-        conn.close()
         
         
     def open_window_program(self):

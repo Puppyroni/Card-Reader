@@ -29,8 +29,7 @@ class MainWindow:
         if not result:
             RegisterWindow()
             
-        # save and close the database
-        conn.commit()     
+        # Close the database  
         conn.close()
         
         # Set the background image
@@ -45,7 +44,7 @@ class MainWindow:
         except TclError:
             print('Erro ao carregar a imagem. Verifique se o formato da imagem é suportado.')
             
-        # Set and Lock window size to match image size
+        # Set window size to match image size
         self.main_window.geometry(f"{pil_image.width}x{pil_image.height}")
        
         
