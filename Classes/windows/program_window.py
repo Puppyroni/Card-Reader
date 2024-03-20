@@ -87,29 +87,30 @@ class ProgramWindow:
         username = self.name_lbl.cget('text')
         
         RegisterWindow(username)
-            # Configure buttons for actions
-            self.enter_btn = Button(self.program_window, text='Entrar', font='Arial 14', bg='cyan', command=self.enter_action)
-            self.enter_btn.grid(row=2, column=0, padx=20, pady=10)
+        
+        # Configure buttons for actions
+        self.enter_btn = Button(self.program_window, text='Entrar', font='Arial 14', bg='cyan', command=self.enter_action)
+        self.enter_btn.grid(row=2, column=0, padx=20, pady=10)
             
-            # Create label for displaying entry time
-            self.entry_time_lbl = Label(self.program_window, text='', font='Arial 14', bg='#f0f0f0')
-            self.entry_time_lbl.grid(row=2, column=1, padx=20, pady=10)
+        # Create label for displaying entry time
+        self.entry_time_lbl = Label(self.program_window, text='', font='Arial 14', bg='#f0f0f0')
+        self.entry_time_lbl.grid(row=2, column=1, padx=20, pady=10)
             
-            self.pause_btn = Button(self.program_window, text='Pausa', font='Arial 14', bg='cyan', command=self.pause_action)
-            self.pause_btn.grid(row=3, column=0, padx=20, pady=10)
+        self.pause_btn = Button(self.program_window, text='Pausa', font='Arial 14', bg='cyan', command=self.pause_action)
+        self.pause_btn.grid(row=3, column=0, padx=20, pady=10)
             
-            self.resume_btn = Button(self.program_window, text='Voltar da Pausa', font='Arial 14', bg='cyan', command=self.resume_action)
-            self.resume_btn.grid(row=3, column=1, padx=20, pady=10)
+        self.resume_btn = Button(self.program_window, text='Voltar da Pausa', font='Arial 14', bg='cyan', command=self.resume_action)
+        self.resume_btn.grid(row=3, column=1, padx=20, pady=10)
             
-            self.exit_btn = Button(self.program_window, text='Sair do Trabalho', font='Arial 14', bg='cyan', command=self.exit_action)
-            self.exit_btn.grid(row=4, column=0, columnspan=2, padx=20, pady=10)
+        self.exit_btn = Button(self.program_window, text='Sair do Trabalho', font='Arial 14', bg='cyan', command=self.exit_action)
+        self.exit_btn.grid(row=4, column=0, columnspan=2, padx=20, pady=10)
             
-            # Create label for displaying current system time
-            self.clock_lbl = Label(self.program_window, text='', font='Arial 14', bg='#f0f0f0')
-            self.clock_lbl.grid(row=5, column=0, columnspan=2, pady=10)
+        # Create label for displaying current system time
+        self.clock_lbl = Label(self.program_window, text='', font='Arial 14', bg='#f0f0f0')
+        self.clock_lbl.grid(row=5, column=0, columnspan=2, pady=10)
             
-            # Update clock label every second
-            self.update_clock()
+        # Update clock label every second
+        self.update_clock()
             
     def enter_action(self):
         # Get current time
