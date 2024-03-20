@@ -50,17 +50,17 @@ class MainWindow:
         
         # Configure a welcome text
         self.welcome_lbl = Label(self.main_window, text = 'Card Reader', font = 'Arial 20', bg = '#f0f0f0')
-        self.welcome_lbl.grid(row = 0, column = 1, columnspan = 2, pady = 20)
+        self.welcome_lbl.grid(row = 0, column = 1, columnspan = 2, pady = 20, sticky = 'NS')
         
         # Configure a button of login
         self.login_btn = Button(self.main_window, text = 'Login', font = 'Arial 14', bg = 'cyan',
-                                command = self.open_window_login) # command missing
-        self.login_btn.grid(row = 2, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
+                                command = self.open_window_login)
+        self.login_btn.grid(row = 2, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NS')
         
         # Configure a button of exit
         self.exit_btn = Button(self.main_window, text = 'Exit', font = 'Arial 14', bg = 'cyan', 
-                               command = self.main_window.destroy) # command missing
-        self.exit_btn.grid(row = 3, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
+                               command = self.main_window.destroy)
+        self.exit_btn.grid(row = 3, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NS')
         
         
     def open_window_register(self):
