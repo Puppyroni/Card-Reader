@@ -7,7 +7,7 @@ import os
 
 
 class RegisterWindow:
-    def __init__(self):
+    def __init__(self, username):
         # Create the register window
         self.register_window = Toplevel() # Create window
         self.register_window.title('Registry') # Change Tittle
@@ -52,9 +52,6 @@ class RegisterWindow:
         conn = sqlite3.connect('User_Data.db')
         cursor = conn.cursor()
         
-        # Get Inserted Username
-        username = self.username_entry.get()
-        
         # Check the quary for a SuperUser, Admin or Chief
         cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser' or cargo='Admin' or cargo='Chefe'", 
                        (username,))
@@ -68,51 +65,21 @@ class RegisterWindow:
             # Create field for age [Make it not show on first creation of superuser]
             self.age_lbl = Label(self.register_window, text = 'Age', font = 'Arial 14 bold', bg = '#f0f0f0')
             self.age_lbl.grid(row = 3, column = 0, pady = 20, sticky = 'E')
-            self.age_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
+            self.age_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0')
             self.age_entry.grid(row = 3, column = 1, pady = 20, sticky = 'E')
                 
             # Create field for address
             self.address_lbl = Label(self.register_window, text = 'Address', font = 'Arial 14 bold', bg = '#f0f0f0')
             self.address_lbl.grid(row = 4, column = 0, pady = 20, sticky = 'E')
-            self.address_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
+            self.address_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0')
             self.address_entry.grid(row = 4, column = 1, pady = 20, sticky = 'E')
             
             # Create field for job
             self.job_lbl = Label(self.register_window, text = 'Job', font = 'Arial 14 bold', bg = '#f0f0f0')
             self.job_lbl.grid(row = 5, column = 0, pady = 20, sticky = 'E')
-            self.job_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
+            self.job_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0')
             self.job_entry.grid(row = 5, column = 1, pady = 20, sticky = 'E')
         
-        # Check the quary for a SuperUser
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser'", (username,))
-        result_superuser = cursor.fetchone()
-        
-        # Check if the entered username is a SuperUser or a Admin
-        if result_superuser:
-            # Allow ability to Create Admins, Chiefs and Workers
-            self.temp_lbl = Label(self.register_window, text = 'Can create Admin, Workers and Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
-            
-        # Check the quary for a Admin 
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Admin'", (username,))
-        result_admin = cursor.fetchone()
-        
-        # Check if the entered username is a SuperUser or a Admin
-        if result_admin:
-            # Allow ability to Create workers
-            self.temp_lbl = Label(self.register_window, text = 'Can create Workers and Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
-        
-        # Check the quary for a Chefe 
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Chefe'", (username,))
-        result_chief = cursor.fetchone()
-        
-        # Check if the entered username is a SuperUser or a Admin
-        if result_chief:
-            # Allow ability to Create workers
-            self.temp_lbl = Label(self.register_window, text = 'Can create Workers but not other Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
-            
         # save and close the database
         conn.commit()     
         conn.close()
