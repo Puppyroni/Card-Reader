@@ -2,10 +2,11 @@ from tkinter import *
 from datetime import datetime, timedelta
 import sqlite3
 from Classes.windows.register_window import RegisterWindow
+from Classes.windows.data_list_window import DataListWindow
 
 class ProgramWindow:
     def __init__(self, username):
-        self.username = username  # Armazenar o nome de usuário como atributo da instância
+        self.username = username  # Store the username as an instance attribute
         
         # Create the main window
         self.program_window = Toplevel()
@@ -25,15 +26,9 @@ class ProgramWindow:
         # Name
         self.name_lbl = Label(self.program_window, text = result_user[1], font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
         self.name_lbl.grid(row = 0, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
-        # Age
-        self.age_lbl = Label(self.program_window, text = result_user[3], font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
-        self.age_lbl.grid(row = 1, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
-        # Address
-        self.address_lbl = Label(self.program_window, text = result_user[4], font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
-        self.address_lbl.grid(row = 2, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
         # Job
         self.job_lbl = Label(self.program_window, text = result_user[5], font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
-        self.job_lbl.grid(row = 3, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
+        self.job_lbl.grid(row = 0, column = 2, columnspan = 2, pady = 20, sticky = 'NSEW')
         
         # Check the query for a SuperUser, Admin, or Chief
         self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND (cargo='SuperUser' or cargo='Admin' or cargo='Chefe')", (username,))
@@ -43,7 +38,11 @@ class ProgramWindow:
         if result_job:
             # Configure a button of register
             self.register_btn = Button(self.program_window, text = 'Register', font = 'Arial 14', bg = 'cyan', command = self.open_window_register)
-            self.register_btn.grid(row = 4, column = 1, columnspan = 2, padx = 20, pady = 10)
+            self.register_btn.grid(row = 4, column = 2, columnspan = 2, padx = 20, pady = 10)
+            
+            # Configure a button of worker's schedule TEMP: for now uses register Button
+            self.Schedule_btn = Button(self.program_window, text = 'Schedules', font = 'Arial 14', bg = 'cyan', command = self.open_window_data_list)
+            self.Schedule_btn.grid(row = 5, column = 2, columnspan = 2, padx = 20, pady = 10)
             
         # Check the quary for a SuperUser
         self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser'", (username,))
@@ -53,7 +52,7 @@ class ProgramWindow:
         if result_superuser:
             # Allow ability to Create Admins, Chefes and Workers
             self.temp_lbl = Label(self.program_window, text = 'Can create Admin, Workers and Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
+            self.temp_lbl.grid(row = 6, column = 2, pady = 20, sticky = 'E')
             
         # Check the quary for a Admin 
         self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Admin'", (username,))
@@ -63,7 +62,7 @@ class ProgramWindow:
         if result_admin:
             # Allow ability to Create workers and Chefes
             self.temp_lbl = Label(self.program_window, text = 'Can create Workers and Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
+            self.temp_lbl.grid(row = 6, column = 2, pady = 20, sticky = 'E')
             
         # Check the quary for a Chefe 
         self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Chefe'", (username,))
@@ -73,31 +72,31 @@ class ProgramWindow:
         if result_chief:
             # Allow ability to Create workers
             self.temp_lbl = Label(self.program_window, text = 'Can create Workers but not other Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
+            self.temp_lbl.grid(row = 6, column = 2, pady = 20, sticky = 'E')
             
         # Configure buttons for actions
         self.enter_btn = Button(self.program_window, text='Entrar', font='Arial 14', bg='cyan', command=self.enter_action)
-        self.enter_btn.grid(row=4, column=0, padx=20, pady=10)
+        self.enter_btn.grid(row=5, column=0, padx=20, pady=10)
             
         # Create label for displaying entry time
         self.entry_time_lbl = Label(self.program_window, text='', font='Arial 14', bg='#f0f0f0')
-        self.entry_time_lbl.grid(row=4, column=1, padx=20, pady=10)
+        self.entry_time_lbl.grid(row=5, column=1, padx=20, pady=10)
         
         # Create label for displaying entry break time    
         self.pause_btn = Button(self.program_window, text='Pausa', font='Arial 14', bg='cyan', command=self.pause_action)
-        self.pause_btn.grid(row=5, column=0, padx=20, pady=10)
+        self.pause_btn.grid(row=6, column=0, padx=20, pady=10)
         
         # Create label for displaying exit break time   
         self.resume_btn = Button(self.program_window, text='Voltar da Pausa', font='Arial 14', bg='cyan', command=self.resume_action)
-        self.resume_btn.grid(row=5, column=1, padx=20, pady=10)
+        self.resume_btn.grid(row=6, column=1, padx=20, pady=10)
         
         # Create label for displaying exit time     
         self.exit_btn = Button(self.program_window, text='Sair do Trabalho', font='Arial 14', bg='cyan', command=self.exit_action)
-        self.exit_btn.grid(row=6, column=0, columnspan=2, padx=20, pady=10)
+        self.exit_btn.grid(row=7, column=0, columnspan=2, padx=20, pady=10)
             
         # Create label for displaying current system time
         self.clock_lbl = Label(self.program_window, text='', font='Arial 14', bg='#f0f0f0')
-        self.clock_lbl.grid(row=7, column=0, columnspan=2, pady=10)
+        self.clock_lbl.grid(row=8, column=0, columnspan=2, pady=10)
             
         # Update clock label every second
         self.update_clock()
@@ -109,6 +108,10 @@ class ProgramWindow:
         
          # Pass the username to the other window
         RegisterWindow(username)
+        
+    
+    def open_window_data_list(self):
+        DataListWindow()
             
 
     def enter_action(self):
