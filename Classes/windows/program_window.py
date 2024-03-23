@@ -15,12 +15,12 @@ class ProgramWindow:
         
         
         # Connect to a database
-        conn = sqlite3.connect('User_Data.db')
-        cursor = conn.cursor()
+        self.conn = sqlite3.connect('User_Data.db')
+        self.cursor = self.conn.cursor()
         
         # Check the query for an inserted username from login
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=?", (username,))
-        result_user = cursor.fetchone()
+        self.cursor.execute("SELECT * FROM funcionarios WHERE nome=?", (username,))
+        result_user = self.cursor.fetchone()
         
         # Create info field
         # Name
@@ -37,8 +37,8 @@ class ProgramWindow:
         self.job_lbl.grid(row = 3, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
         
         # Check the query for a SuperUser, Admin, or Chief
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND (cargo='SuperUser' or cargo='Admin' or cargo='Chefe')", (username,))
-        result_job = cursor.fetchone()
+        self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND (cargo='SuperUser' or cargo='Admin' or cargo='Chefe')", (username,))
+        result_job = self.cursor.fetchone()
         
         # Check if the entered username is a SuperUser
         if result_job:
@@ -47,8 +47,8 @@ class ProgramWindow:
             self.register_btn.grid(row = 4, column = 1, columnspan = 2, padx = 20, pady = 10)
             
         # Check the quary for a SuperUser
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser'", (username,))
-        result_superuser = cursor.fetchone()
+        self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser'", (username,))
+        result_superuser = self.cursor.fetchone()
         
         # Check if the entered username is a SuperUser
         if result_superuser:
@@ -57,8 +57,8 @@ class ProgramWindow:
             self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
             
         # Check the quary for a Admin 
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Admin'", (username,))
-        result_admin = cursor.fetchone()
+        self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Admin'", (username,))
+        result_admin = self.cursor.fetchone()
         
         # Check if the entered username is a a Admin
         if result_admin:
@@ -67,17 +67,14 @@ class ProgramWindow:
             self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
             
         # Check the quary for a Chefe 
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Chefe'", (username,))
-        result_chief = cursor.fetchone()
+        self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Chefe'", (username,))
+        result_chief = self.cursor.fetchone()
         
         # Check if the entered username is a Chefe
         if result_chief:
             # Allow ability to Create workers
             self.temp_lbl = Label(self.program_window, text = 'Can create Workers but not other Chiefs', font = 'Arial 14 bold', bg = '#f0f0f0')
             self.temp_lbl.grid(row = 5, column = 2, pady = 20, sticky = 'E')
-            
-        # Close the database   
-        conn.close()
             
         # Configure buttons for actions
         self.enter_btn = Button(self.program_window, text='Entrar', font='Arial 14', bg='cyan', command=self.enter_action)
@@ -118,8 +115,15 @@ class ProgramWindow:
     def enter_action(self):
         # Get current time
         current_time = datetime.now().strftime('%H:%M:%S')
+        
+        # Insert entry time into the database
+        self.cursor.execute("INSERT INTO picagem_entrada (id_funcionario, picagem_data, hora_registro) VALUES (?, ?, ?)",
+                            (self.get_user_id(), datetime.now().date(), current_time))
+        self.conn.commit()
+        
         # Display entry time and message
         self.entry_time_lbl.config(text=f'Entrada: {current_time}\nBom trabalho!')
+        
         
     def pause_action(self):
         self.pause_start_time = datetime.now()
@@ -127,9 +131,12 @@ class ProgramWindow:
         # Exibir mensagem para o funcionário
         current_time = self.pause_start_time.strftime('%H:%M:%S')
         self.entry_time_lbl.config(text=f'Pausa iniciada: {current_time}\nBom almoço!')
-
-        # Registrar no sistema do gerente
-        self.log_manager(f'{self.username} iniciou a pausa às {current_time}')
+        
+        # Insert pause start time into the database
+        self.cursor.execute("INSERT INTO picagem_entrada_pausa (id_funcionario, picagem_data, hora_registro) VALUES (?, ?, ?)",
+                            (self.get_user_id(), datetime.now().date(), current_time))
+        self.conn.commit()
+        
     
     def resume_action(self):
         # Calcular a duração da pausa
@@ -139,14 +146,35 @@ class ProgramWindow:
         # Exibir mensagem para o funcionário
         current_time = datetime.now().strftime('%H:%M:%S')
         self.entry_time_lbl.config(text=f'Voltou da Pausa: {current_time}\nDuração da Pausa: {pause_duration_str}')
-
-        # Registrar no sistema do gerente 
-        self.log_manager(f'{self.username} voltou da pausa às {current_time}. Duração da pausa: {pause_duration_str}')
-        #    ^  E: AttributeError: 'ProgramWindow' object has no attribute 'log_manager'
+        
+        # Insert pause exit time into the database
+        self.cursor.execute("INSERT INTO picagem_saida_pausa (id_funcionario, picagem_data, hora_registro) VALUES (?, ?, ?)",
+                            (self.get_user_id(), datetime.now().date(), current_time))
+        self.conn.commit()
+        
     
     def exit_action(self):
-        # Implement the action for "Sair do Trabalho"
-        pass
+        # N: will need to make a work with Breaks
+        # Get current time
+        current_time = datetime.now().strftime('%H:%M:%S')
+        
+        # Insert exit time into the database
+        self.cursor.execute("INSERT INTO picagem_saida (id_funcionario, picagem_data, hora_registro) VALUES (?, ?, ?)",
+                            (self.get_user_id(), datetime.now().date(), current_time))
+        self.conn.commit()
+        
+        # Display entry time and message
+        self.entry_time_lbl.config(text=f'Saida: {current_time}\nBom trabalho!')
+    
+    
+    def get_user_id(self):
+        # Retrieve user ID from the database based on the username
+        self.cursor.execute("SELECT id FROM funcionarios WHERE nome=?", (self.username,))
+        user_id = self.cursor.fetchone()
+        
+        # Check for the username
+        return user_id[0] if user_id else None
+    
     
     def update_clock(self):
         # Get current system time
@@ -157,3 +185,8 @@ class ProgramWindow:
         
         # Schedule next update after 1000ms (1 second)
         self.program_window.after(1000, self.update_clock)
+    
+    
+    def __del__(self):
+        # Close the database connection when the object is destroyed
+        self.conn.close()

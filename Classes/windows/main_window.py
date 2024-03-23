@@ -26,7 +26,7 @@ class MainWindow:
         
         # Check if SuperUser was not created
         if not result:
-            RegisterWindow()
+            RegisterWindow('')
             
         # Close the database  
         conn.close()
@@ -59,9 +59,6 @@ class MainWindow:
         self.exit_btn = Button(self.main_window, text = 'Exit', font = 'Arial 14', bg = 'cyan', command=self.main_window.destroy)
         self.exit_btn.pack(pady=(5, 50))  # Ajuste do espaçamento superior e inferio
         
-        
-    def open_window_register(self):
-        RegisterWindow()
     
     def open_window_login(self):
         LogInWindow()
