@@ -14,6 +14,9 @@ class RegisterWindow:
         self.register_window.iconbitmap('Assets/icons/icon.ico') # Change icon
         self.register_window.configure(bg = '#f0f0f0') # Change the background color
         
+        # Connect to a database
+        self.conn = sqlite3.connect('User_Data.db')
+        self.cursor = self.conn.cursor()
         
         # Set the background image
         try:
@@ -48,14 +51,10 @@ class RegisterWindow:
         self.password_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
         self.password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
         
-        # Connect to a database
-        conn = sqlite3.connect('User_Data.db')
-        cursor = conn.cursor()
-        
         # Check the quary for a SuperUser, Admin or Chief
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser' or cargo='Admin' or cargo='Chefe'", 
+        self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser' or cargo='Admin' or cargo='Chefe'", 
                        (username,))
-        self.result_extra_reg = cursor.fetchone()
+        self.result_extra_reg =  self.cursor.fetchone()
         
         if self.result_extra_reg:
             # Create resgister label
@@ -79,9 +78,6 @@ class RegisterWindow:
             self.job_lbl.grid(row = 5, column = 0, pady = 20, sticky = 'E')
             self.job_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0')
             self.job_entry.grid(row = 5, column = 1, pady = 20, sticky = 'E')
-        
-        # Close the database    
-        conn.close()
             
         # Configure a button of register
         self.register_btn = Button(self.register_window, text = 'Register', font = 'Arial 14', bg = 'cyan', command = self.register_user)
@@ -117,36 +113,36 @@ class RegisterWindow:
         
         # Combine Hashed password with salt
         password_set = f'{salt_hex}:{password_hash_hex}'
-    
-        
-        # Connect to a database
-        conn = sqlite3.connect('User_Data.db')
-        cursor = conn.cursor()
+
         # Check the quary for a Super User
-        cursor.execute("SELECT * FROM funcionarios WHERE cargo='SuperUser'")
-        result = cursor.fetchone()
+        self.cursor.execute("SELECT * FROM funcionarios WHERE cargo='SuperUser'")
+        result = self.cursor.fetchone()
         
         # Check if SuperUser was inserted
         if result:
-            # Insert a user
-            cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo) VALUES (?, ?, ?, ?, ?)', 
+             # Insert a user
+             self.cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo) VALUES (?, ?, ?, ?, ?)', 
                            (user_data, password_set, age_data, address_data, job_data))
         else:
-            # Insert a superuser
-            cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo) VALUES (?, ?, ?, ?, ?)', 
+             # Insert a superuser
+             self.cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo) VALUES (?, ?, ?, ?, ?)', 
                            (user_data, password_set, age_data, address_data, 'SuperUser'))
             
-            # Message of successful SuperUser registry
-            self.message_register_completed = Label(self.register_window, text = 'SuperUser!', fg= 'green')
-            self.message_register_completed.grid(row = 9, column = 0, columnspan = 2)
+             # Message of successful SuperUser registry
+             self.message_register_completed = Label(self.register_window, text = 'SuperUser!', fg= 'green')
+             self.message_register_completed.grid(row = 9, column = 0, columnspan = 2)
         
-        # save and close the database
-        conn.commit()     
-        conn.close()
+        # save to the database
+        self.conn.commit()
         
         # Message of successful User registry
         self.message_register_completed = Label(self.register_window, text = 'The Registry was Successful!', fg= 'green')
         self.message_register_completed.grid(row = 6, column = 0, columnspan = 2)
         self.message_register_completed.after(3000, self.register_window.destroy)
+        
+        
+    def __del__(self):
+        # Close the database connection when the object is destroyed
+        self.conn.close()
         
         

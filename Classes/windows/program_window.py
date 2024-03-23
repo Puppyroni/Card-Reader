@@ -12,8 +12,7 @@ class ProgramWindow:
         self.program_window.title('Program')
         self.program_window.iconbitmap('Assets/icons/icon.ico')
         self.program_window.configure(bg='#f0f0f0')
-        
-        
+         
         # Connect to a database
         self.conn = sqlite3.connect('User_Data.db')
         self.cursor = self.conn.cursor()
@@ -111,7 +110,7 @@ class ProgramWindow:
          # Pass the username to the other window
         RegisterWindow(username)
             
-    # A: Data is not being added to the database for now
+
     def enter_action(self):
         # Get current time
         current_time = datetime.now().strftime('%H:%M:%S')
@@ -119,6 +118,8 @@ class ProgramWindow:
         # Insert entry time into the database
         self.cursor.execute("INSERT INTO picagem_entrada (id_funcionario, picagem_data, hora_registro) VALUES (?, ?, ?)",
                             (self.get_user_id(), datetime.now().date(), current_time))
+        
+        # Save to the database
         self.conn.commit()
         
         # Display entry time and message
@@ -135,11 +136,13 @@ class ProgramWindow:
         # Insert pause start time into the database
         self.cursor.execute("INSERT INTO picagem_entrada_pausa (id_funcionario, picagem_data, hora_registro) VALUES (?, ?, ?)",
                             (self.get_user_id(), datetime.now().date(), current_time))
+        
+        # Save to the database
         self.conn.commit()
         
     
     def resume_action(self):
-        # Calcular a duração da pausa
+        # Calculate the duraction of the break
         pause_duration = datetime.now() - self.pause_start_time
         pause_duration_str = str(timedelta(seconds=pause_duration.seconds))
 
@@ -150,17 +153,20 @@ class ProgramWindow:
         # Insert pause exit time into the database
         self.cursor.execute("INSERT INTO picagem_saida_pausa (id_funcionario, picagem_data, hora_registro) VALUES (?, ?, ?)",
                             (self.get_user_id(), datetime.now().date(), current_time))
+        
+        # Save to the database
         self.conn.commit()
         
     
     def exit_action(self):
-        # N: will need to make a work with Breaks
         # Get current time
         current_time = datetime.now().strftime('%H:%M:%S')
         
         # Insert exit time into the database
         self.cursor.execute("INSERT INTO picagem_saida (id_funcionario, picagem_data, hora_registro) VALUES (?, ?, ?)",
                             (self.get_user_id(), datetime.now().date(), current_time))
+        
+        # Save to the database
         self.conn.commit()
         
         # Display entry time and message

@@ -15,6 +15,9 @@ class LogInWindow:
         self.login_window.iconbitmap('Assets/icons/icon.ico') # Change icon
         self.login_window.configure(bg = '#f0f0f0') # Change the background color
         
+        # Connect to a database
+        self.conn = sqlite3.connect('User_Data.db')
+        self.cursor = self.conn.cursor()
         
         # Set the background image
         try:
@@ -72,14 +75,10 @@ class LogInWindow:
         # Get inserted data
         entered_username = self.username_entry.get()
         entered_password = self.password_entry.get()
-
-        # Connect to a database 
-        conn = sqlite3.connect('User_Data.db')
-        cursor = conn.cursor()
         
         # Query the database to check if the entered username is correct
-        cursor.execute("SELECT * FROM funcionarios WHERE nome=?", (entered_username,))
-        result = cursor.fetchone()
+        self.cursor.execute("SELECT * FROM funcionarios WHERE nome=?", (entered_username,))
+        result = self.cursor.fetchone()
 
         # Check if the entered username is present in the database
         if result:
@@ -98,9 +97,6 @@ class LogInWindow:
                 self.message_login_completed.after(1000, self.open_window_program)
                 return
         
-        # Close the database   
-        conn.close()
-        
         # If credentials are incorrect, display an error message
         self.message_login_completed = Label(self.login_window, text='Invalid username or password', fg='red')
         self.message_login_completed.grid(row=3, column=0, columnspan=2)
@@ -112,3 +108,8 @@ class LogInWindow:
         
         # Pass the username to the other window
         ProgramWindow(entered_username)
+      
+        
+    def __del__(self):
+        # Close the database connection when the object is destroyed
+        self.conn.close()

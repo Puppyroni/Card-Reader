@@ -17,19 +17,17 @@ class MainWindow:
         self.main_window.configure(bg = '#f0f0f0') # Change the background color
         
 
-        # Connect and save to a database
-        conn = sqlite3.connect('User_Data.db')
-        cursor = conn.cursor()
+        # Connect to a database
+        self.conn = sqlite3.connect('User_Data.db')
+        self.cursor = self.conn.cursor()
+        
         # Check the quary for a SuperUser
-        cursor.execute("SELECT * FROM funcionarios WHERE cargo='SuperUser'")
-        result = cursor.fetchone()
+        self.cursor.execute("SELECT * FROM funcionarios WHERE cargo='SuperUser'")
+        result = self.cursor.fetchone()
         
         # Check if SuperUser was not created
         if not result:
             RegisterWindow('')
-            
-        # Close the database  
-        conn.close()
         
         # Set the background image
         try:
@@ -62,3 +60,8 @@ class MainWindow:
     
     def open_window_login(self):
         LogInWindow()
+        
+    
+    def __del__(self):
+        # Close the database connection when the object is destroyed
+        self.conn.close()
