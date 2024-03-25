@@ -33,9 +33,14 @@ class ProgramWindow:
         self.job_lbl.grid(row = 0, column = 2, columnspan = 2, pady = 20, sticky = 'NSEW')
         
         # Check the query for a SuperUser, Admin, or Chief
-        self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND (cargo='SuperUser' or cargo='Admin' or cargo='Chefe')", (username,))
+        self.cursor.execute("""
+            SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
+            INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
+            WHERE funcionarios.nome=? 
+            AND (cargo.cargo_nome='SuperUser' OR cargo.cargo_nome='Admin' OR cargo.cargo_nome='Chefe')
+        """, (username,))
         result_job = self.cursor.fetchone()
-        
+
         # Check if the entered username is a SuperUser
         if result_job:
             # Configure a button of register
@@ -47,27 +52,50 @@ class ProgramWindow:
             self.Schedule_btn.grid(row = 18, column = 2, columnspan = 2, padx = 20, pady = 10)
             
         # Check the quary for a SuperUser
-        self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser'", (username,))
+        self.cursor.execute("""
+            SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
+            INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
+            WHERE funcionarios.nome=? AND cargo.cargo_nome='SuperUser'
+        """, (username,))
         result_superuser = self.cursor.fetchone()
         
+        
+        # Options for the dropdown list
+        self.job_options = []
+        
+        # Check if the entered username is a SuperUser
+        if result_superuser:
+            # Allow ability to Create Admins, Chefes and Workers
+            # Append SuperUser options to job_options
+            self.job_options.extend(['Admin', 'Gerente', 'Temp'])
             
         # Check the quary for a Admin 
-        self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Admin'", (username,))
+        self.cursor.execute("""
+            SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
+            INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
+            WHERE funcionarios.nome=? AND cargo.cargo_nome='Admin'
+        """, (username,))
         result_admin = self.cursor.fetchone()
         
         # Check if the entered username is a a Admin
-       
+        if result_admin:
+            # Allow ability to Create workers and Chefes
+            # Append Admin options to job_options
+            self.job_options.extend(['Gerente', 'Temp'])
             
-            
-        # Check the quary for a Chefe 
-        self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='Chefe'", (username,))
-        result_chief = self.cursor.fetchone()
+        # Check the quary for a Gerente 
+        self.cursor.execute("""
+            SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
+            INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
+            WHERE funcionarios.nome=? AND cargo.cargo_nome='Gerente'
+        """, (username,))
+        result_maneger = self.cursor.fetchone()
         
         # Check if the entered username is a Chefe
-        if result_chief:
+        if result_maneger:
             # Allow ability to Create workers
-            self.temp_lbl = Label(self.program_window, text = '', font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.temp_lbl.grid(row = 9, column = 5, pady = 20, sticky = 'E')
+            # Append Chefe options to job_options
+            self.job_options.extend(['temp'])
             
         self.enter_btn = Button(self.program_window, text='Entrar', font='Arial 14', bg='#4CAF50', fg='white', command=self.enter_action)
         self.enter_btn.grid(row=6, column=0, padx=20, pady=10)
@@ -96,8 +124,8 @@ class ProgramWindow:
         # Get the username label text in the login window
         username = self.name_lbl.cget('text')
         
-         # Pass the username to the other window
-        RegisterWindow(username)
+        # Pass the username and job options to the other window
+        RegisterWindow(username, self.job_options)
         
     
     def open_window_data_list(self):

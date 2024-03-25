@@ -7,12 +7,14 @@ import os
 
 
 class RegisterWindow:
-    def __init__(self, username):
+    def __init__(self, username, job_options):
         # Create the register window
         self.register_window = Toplevel() # Create window
         self.register_window.title('Registry') # Change Tittle
         self.register_window.iconbitmap('Assets/icons/icon.ico') # Change icon
         self.register_window.configure(bg = '#f0f0f0') # Change the background color
+        
+        self.job_options = job_options
         
         # Connect to a database
         self.conn = sqlite3.connect('User_Data.db')
@@ -52,8 +54,12 @@ class RegisterWindow:
         self.password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
         
         # Check the quary for a SuperUser, Admin or Chief
-        self.cursor.execute("SELECT * FROM funcionarios WHERE nome=? AND cargo='SuperUser' or cargo='Admin' or cargo='Chefe'", 
-                       (username,))
+        self.cursor.execute("""
+            SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
+            INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
+            WHERE funcionarios.nome=? 
+            AND (cargo.cargo_nome='SuperUser' OR cargo.cargo_nome='Admin' OR cargo.cargo_nome='Chefe')
+        """, (username,))
         self.result_extra_reg =  self.cursor.fetchone()
         
         if self.result_extra_reg:
@@ -74,10 +80,18 @@ class RegisterWindow:
             self.address_entry.grid(row = 4, column = 1, pady = 20, sticky = 'E')
             
             # Create field for job
-            self.job_lbl = Label(self.register_window, text = 'Job', font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.job_lbl.grid(row = 5, column = 0, pady = 20, sticky = 'E')
-            self.job_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.job_entry.grid(row = 5, column = 1, pady = 20, sticky = 'E')
+            self.job_lbl = Label(self.register_window, text='Job', font='Arial 14 bold', bg='#f0f0f0')
+            self.job_lbl.grid(row=5, column=0, pady=20, sticky='E')
+
+
+            # Variable to store the selected job
+            self.selected_job = StringVar(self.register_window)
+            self.selected_job.set(job_options[0])  # Set default option
+
+            # Dropdown list widget
+            self.job_option = OptionMenu(self.register_window, self.selected_job, *job_options)
+            self.job_option.config(font = 'Arial 14 bold', bg = '#f0f0f0', width = 15)
+            self.job_option.grid(row = 5, column = 1, pady = 20, sticky = 'E')
             
         # Configure a button of register
         self.register_btn = Button(self.register_window, text = 'Register', font = 'Arial 14', bg = 'cyan', command = self.register_user)
@@ -99,7 +113,7 @@ class RegisterWindow:
         if self.result_extra_reg:
             age_data = self.age_entry.get()
             address_data = self.address_entry.get()
-            job_data = self.job_entry.get()
+            job_data = self.job_option.cget('text')
         
         # Generate value of salt
         salt = os.urandom(16)
@@ -115,22 +129,30 @@ class RegisterWindow:
         password_set = f'{salt_hex}:{password_hash_hex}'
 
         # Check the quary for a Super User
-        self.cursor.execute("SELECT * FROM funcionarios WHERE cargo='SuperUser'")
+        self.cursor.execute("""
+            SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
+            INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
+            WHERE cargo.cargo_nome='SuperUser'""")
         result = self.cursor.fetchone()
         
         # Check if SuperUser was inserted
         if result:
-             # Insert a user
-             self.cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo) VALUES (?, ?, ?, ?, ?)', 
-                           (user_data, password_set, age_data, address_data, job_data))
-        else:
-             # Insert a superuser
-             self.cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo) VALUES (?, ?, ?, ?, ?)', 
-                           (user_data, password_set, age_data, address_data, 'SuperUser'))
+            # Query for existing Job
+            self.cursor.execute("SELECT id FROM cargo WHERE cargo_nome=?", (job_data,))
+            # Retrieve the ID of the existing job
+            cargo_id = self.cursor.fetchone()
             
-             # Message of successful SuperUser registry
-             self.message_register_completed = Label(self.register_window, text = 'SuperUser!', fg= 'green')
-             self.message_register_completed.grid(row = 9, column = 0, columnspan = 2)
+            # Insert a user
+            self.cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo_id) VALUES (?, ?, ?, ?, ?)',
+                            (user_data, password_set, age_data, address_data, cargo_id[0]))
+        else:
+            # Insert a user
+            self.cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo_id) VALUES (?, ?, ?, ?, ?)',
+                           (user_data, password_set, age_data, address_data, 1))
+            
+            # Message of successful SuperUser registry
+            self.message_register_completed = Label(self.register_window, text = 'SuperUser!', fg = 'green')
+            self.message_register_completed.grid(row = 9, column = 0, columnspan = 2)
         
         # save to the database
         self.conn.commit()
