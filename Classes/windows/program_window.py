@@ -15,6 +15,7 @@ class ProgramWindow:
         self.program_window.iconbitmap('Assets/icons/icon.ico')
         self.program_window.configure(bg='#f0f0f0')
         self.program_window.geometry("1000x600")  # Definir o tamanho da janela
+        self.update_clock()
          
         # Connect to a database
         self.conn = sqlite3.connect('User_Data.db')
@@ -119,6 +120,17 @@ class ProgramWindow:
         # Update clock label every second
         self.update_clock()
         
+        def show_working_employees(self):
+            # Consulte o banco de dados para obter a lista de funcionários que estão atualmente trabalhando
+            self.cursor.execute("SELECT nome FROM funcionarios WHERE status_trabalho = ?", ("trabalhando",))
+            working_employees = self.cursor.fetchall()
+            
+            # Exiba a lista de funcionários trabalhando em uma janela ou widget
+            working_window = Toplevel(self.main_window)  # Abra a janela dentro da janela principal
+            for employee in working_employees:
+                label = Label(working_window, text=employee[0])
+                label.pack()
+        
         
     def open_window_register(self):
         # Get the username label text in the login window
@@ -126,6 +138,25 @@ class ProgramWindow:
         
         # Pass the username and job options to the other window
         RegisterWindow(username, self.job_options)
+    
+    def update_clock(self):
+        # Get current system time
+        current_time = datetime.now().strftime('%H:%M:%S')
+        
+        # Update clock label
+        self.clock_lbl.config(text=f'Hora atual: {current_time}')
+        
+        # Consulte o banco de dados para atualizar a lista de funcionários que estão trabalhando
+        self.cursor.execute("SELECT nome FROM funcionarios WHERE status_trabalho = ?", ("trabalhando",))
+        working_employees = self.cursor.fetchall()
+        
+        # Exiba a lista de funcionários trabalhando na janela de schedules
+        self.schedules_window.working_employees_listbox.delete(0, END)  # Limpe a lista existente
+        for employee in working_employees:
+            self.schedules_window.working_employees_listbox.insert(END, employee[0])
+        
+        # Agende a próxima atualização após 1000ms (1 segundo)
+        self.program_window.after(1000, self.update_clock)
         
     
     def open_window_data_list(self):
