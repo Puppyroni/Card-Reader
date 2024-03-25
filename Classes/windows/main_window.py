@@ -22,12 +22,12 @@ class MainWindow:
         self.cursor = self.conn.cursor()
         
         # Check the quary for a SuperUser
-        self.cursor.execute("SELECT * FROM funcionarios WHERE cargo='SuperUser'")
+        self.cursor.execute("SELECT * FROM funcionarios WHERE cargo_id=1")
         result = self.cursor.fetchone()
         
         # Check if SuperUser was not created
         if not result:
-            RegisterWindow('')
+            RegisterWindow('', '')
         
         # Set the background image
         try:
