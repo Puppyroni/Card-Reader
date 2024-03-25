@@ -15,7 +15,7 @@ class ProgramWindow:
         self.program_window.iconbitmap('Assets/icons/icon.ico')
         self.program_window.configure(bg='#f0f0f0')
         self.program_window.geometry("1000x600")  # Definir o tamanho da janela
-        self.update_clock()
+        # self.update_clock() # imposible to work with gives error "AttributeError: 'ProgramWindow' object has no attribute 'clock_lbl'" 
          
         # Connect to a database
         self.conn = sqlite3.connect('User_Data.db')
@@ -38,7 +38,7 @@ class ProgramWindow:
             SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
             INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
             WHERE funcionarios.nome=? 
-            AND (cargo.cargo_nome='SuperUser' OR cargo.cargo_nome='Admin' OR cargo.cargo_nome='Chefe')
+            AND (cargo.cargo_nome='SuperUser' OR cargo.cargo_nome='Admin' OR cargo.cargo_nome='Gerente')
         """, (username,))
         result_job = self.cursor.fetchone()
 
@@ -48,7 +48,7 @@ class ProgramWindow:
             self.register_btn = Button(self.program_window, text = 'Register', font = 'Arial 14', bg = 'cyan', command = self.open_window_register)
             self.register_btn.grid(row = 17, column = 2, columnspan = 2, padx = 20, pady = 10)
             
-            # Configure a button of worker's schedule TEMP: for now uses register Button
+            # Configure a button of worker's schedule
             self.Schedule_btn = Button(self.program_window, text = 'Schedules', font = 'Arial 14', bg = 'cyan', command = self.open_window_data_list)
             self.Schedule_btn.grid(row = 18, column = 2, columnspan = 2, padx = 20, pady = 10)
             
@@ -113,23 +113,12 @@ class ProgramWindow:
         # Configure labels with improved design
         self.entry_time_lbl = Label(self.program_window, text='', font='Arial 14', bg='#f0f0f0', fg='#333')
         self.entry_time_lbl.grid(row=7, column=0, columnspan=4, padx=20, pady=10)
-
+        # Configure Clock label
         self.clock_lbl = Label(self.program_window, text='', font='Arial 14', bg='#f0f0f0', fg='#333')
         self.clock_lbl.grid(row=8, column=0, columnspan=4, pady=10)
             
         # Update clock label every second
         self.update_clock()
-        
-        def show_working_employees(self):
-            # Consulte o banco de dados para obter a lista de funcionários que estão atualmente trabalhando
-            self.cursor.execute("SELECT nome FROM funcionarios WHERE status_trabalho = ?", ("trabalhando",))
-            working_employees = self.cursor.fetchall()
-            
-            # Exiba a lista de funcionários trabalhando em uma janela ou widget
-            working_window = Toplevel(self.main_window)  # Abra a janela dentro da janela principal
-            for employee in working_employees:
-                label = Label(working_window, text=employee[0])
-                label.pack()
         
         
     def open_window_register(self):
@@ -138,65 +127,54 @@ class ProgramWindow:
         
         # Pass the username and job options to the other window
         RegisterWindow(username, self.job_options)
-    
-    def update_clock(self):
-        # Get current system time
-        current_time = datetime.now().strftime('%H:%M:%S')
         
-        # Update clock label
-        self.clock_lbl.config(text=f'Hora atual: {current_time}')
         
-        # Consulte o banco de dados para atualizar a lista de funcionários que estão trabalhando
-        self.cursor.execute("SELECT nome FROM funcionarios WHERE status_trabalho = ?", ("trabalhando",))
-        working_employees = self.cursor.fetchall()
-        
-        # Exiba a lista de funcionários trabalhando na janela de schedules
-        self.schedules_window.working_employees_listbox.delete(0, END)  # Limpe a lista existente
-        for employee in working_employees:
-            self.schedules_window.working_employees_listbox.insert(END, employee[0])
-        
-        # Agende a próxima atualização após 1000ms (1 segundo)
-        self.program_window.after(1000, self.update_clock)
-        
-    
     def open_window_data_list(self):
-        # Consulta SQL para selecionar os funcionários que estão trabalhando atualmente
-        current_time = datetime.now().strftime('%H:%M:%S')
-        query = """
-        SELECT funcionarios.nome 
-        FROM picagem_entrada 
-        INNER JOIN funcionarios ON picagem_entrada.id_funcionario = funcionarios.id 
-        WHERE ? BETWEEN picagem_entrada.hora_registro 
-        AND (SELECT picagem_saida.hora_registro 
-            FROM picagem_saida 
-            WHERE picagem_entrada.id_funcionario = picagem_saida.id_funcionario 
-            ORDER BY picagem_saida.hora_registro DESC 
-            LIMIT 1)
-        """
-        self.cursor.execute(query, (current_time,))
-        working_employees = self.cursor.fetchall()
-
-        # Exibir uma mensagem com os funcionários que estão trabalhando atualmente
-        if working_employees:
-            employee_names = "\n".join([employee[0] for employee in working_employees])
-            messagebox.showinfo("Funcionários Trabalhando Agora", f"Os seguintes funcionários estão trabalhando agora:\n{employee_names}")
-        else:
-            messagebox.showinfo("Funcionários Trabalhando Agora", "Não há funcionários trabalhando neste momento.")
+        # Get the username label text in the login window
+        username = self.name_lbl.cget('text')
+        
+        # Pass the username to the other window
+        DataListWindow(username)
 
 
     def enter_action(self):
         # Get current time
         current_time = datetime.now().strftime('%H:%M:%S')
+
+        # Check if an entry already exists
+        self.cursor.execute("SELECT id FROM picagem_entrada WHERE id_funcionario = ? AND picagem_data = ?",
+                            (self.get_user_id(), datetime.now().date()))
+        existing_entry = self.cursor.fetchone()
         
-        # Insert entry time into the database
-        self.cursor.execute("INSERT INTO picagem_entrada (id_funcionario, picagem_data, hora_registro) VALUES (?, ?, ?)",
-                            (self.get_user_id(), datetime.now().date(), current_time))
+        # Check if the data does not exists
+        if not existing_entry:
+            # Insert entry time into the database
+            self.cursor.execute("INSERT INTO picagem_entrada (id_funcionario, picagem_data, hora_registro) VALUES (?, ?, ?)",
+                                (self.get_user_id(), datetime.now().date(), current_time))
+            
+            # Save to the database
+            self.conn.commit()
         
-        # Save to the database
-        self.conn.commit()
+        # Check if an exit record already exists
+        self.cursor.execute("SELECT id FROM picagem_saida WHERE id_funcionario = ? AND picagem_data = ?",
+                            (self.get_user_id(), datetime.now().date()))
+        existing_exit = self.cursor.fetchone()
         
+        # If an exit record exists, delete it and insert a new one
+        if existing_exit:
+            # Delete exit time from the database
+            self.cursor.execute("DELETE FROM picagem_saida WHERE id = ?", (existing_exit[0],))
+            
+            # Save to the database
+            self.conn.commit()
+            
+            # Debug
+            print(f"Existing exit record deleted for user {self.get_user_id()} on date {datetime.now().date()}.")
+        
+
         # Display entry time and message
         self.entry_time_lbl.config(text=f'Entrada: {current_time}\nBom trabalho!')
+
         
         
     def pause_action(self):
@@ -234,17 +212,24 @@ class ProgramWindow:
     def exit_action(self):
         # Get current time
         current_time = datetime.now().strftime('%H:%M:%S')
+
+        # Check if an exit record already exists
+        self.cursor.execute("SELECT id FROM picagem_saida WHERE id_funcionario = ? AND picagem_data = ?",
+                            (self.get_user_id(), datetime.now().date()))
+        existing_exit = self.cursor.fetchone()
         
-        # Insert exit time into the database
-        self.cursor.execute("INSERT INTO picagem_saida (id_funcionario, picagem_data, hora_registro) VALUES (?, ?, ?)",
-                            (self.get_user_id(), datetime.now().date(), current_time))
-        
-        # Save to the database
-        self.conn.commit()
-        
-        # Display entry time and message
+        # Checks if exit time does not exists
+        if not existing_exit:
+            # Insert exit time into the database
+            self.cursor.execute("INSERT INTO picagem_saida (id_funcionario, picagem_data, hora_registro) VALUES (?, ?, ?)",
+                                (self.get_user_id(), datetime.now().date(), current_time))
+            # Save to the database
+            self.conn.commit()
+
+        # Display exit time and message
         self.entry_time_lbl.config(text=f'Saida: {current_time}\nBom trabalho!')
-    
+
+
     
     def get_user_id(self):
         # Retrieve user ID from the database based on the username
