@@ -26,7 +26,7 @@ class MainWindow:
         self.login_btn = CTkButton(self.main_window, text='Login', command=self.open_window_login)
         self.login_btn.place(relx=0.5, rely=0.5, anchor=CENTER)
 
-        self.exit_btn = CTkButton(self.main_window, text='Exit', command=self.main_window.destroy)
+        self.exit_btn = CTkButton(self.main_window, text='Sair', command=self.main_window.destroy)
         self.exit_btn.place(relx=0.5, rely=0.7, anchor=CENTER)
     
     

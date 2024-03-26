@@ -23,7 +23,7 @@ class LogInWindow:
         self.login_lbl.place(relx=0.5, rely=0.1, anchor='center')
 
         # Create the label and entry field for username
-        self.username_lbl = CTkLabel(self.login_window, text='Username', fg_color="transparent")
+        self.username_lbl = CTkLabel(self.login_window, text='Utilizador', fg_color="transparent")
         self.username_lbl.place(relx=0.3, rely=0.3, anchor='e')
         self.username_entry = CTkEntry(self.login_window)
         self.username_entry.place(relx=0.4, rely=0.3, anchor='w')  # Adjusted relx
@@ -39,7 +39,7 @@ class LogInWindow:
         self.login_btn.place(relx=0.5, rely=0.7, anchor='center')  # Adjusted rely
 
         # Configure the exit button
-        self.exit_btn = CTkButton(self.login_window, text='Exit', command=self.login_window.destroy)
+        self.exit_btn = CTkButton(self.login_window, text='Sair', command=self.login_window.destroy)
         self.exit_btn.place(relx=0.5, rely=0.9, anchor='center')  # Adjusted rely
         
  

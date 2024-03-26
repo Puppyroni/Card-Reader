@@ -10,7 +10,7 @@ class ProgramWindow:
        
         # Create the main window
         self.program_window = CTkToplevel()
-        self.program_window.title('Program')
+        self.program_window.title('Programa')
         self.program_window.resizable(False, False)
          
         # Connect to a database
@@ -49,11 +49,11 @@ class ProgramWindow:
         # Check if the entered username is a SuperUser
         if result_job:
             # Configure a button of register
-            self.register_btn = CTkButton(self.program_window, text='Register', command=self.open_window_register)
+            self.register_btn = CTkButton(self.program_window, text='Registar', command=self.open_window_register)
             self.register_btn.grid(row=17, column=2, columnspan=2, padx=20, pady=10)
            
             # Configure a button of worker's schedule
-            self.Schedule_btn = CTkButton(self.program_window, text='Schedules', command=self.open_window_data_list)
+            self.Schedule_btn = CTkButton(self.program_window, text='Horários', command=self.open_window_data_list)
             self.Schedule_btn.grid(row=18, column=2, columnspan=2, padx=20, pady=10)
            
         # Check the quary for a SuperUser
@@ -181,9 +181,6 @@ class ProgramWindow:
            
             # Save to the database
             self.conn.commit()
-           
-            # Debug
-            print(f"Existing exit record deleted for user {self.get_user_id()} on date {datetime.now().date()}.")
        
  
         # Display entry time and message
