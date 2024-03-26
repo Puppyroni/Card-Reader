@@ -1,59 +1,39 @@
-# imports
-from tkinter import *
-from PIL import Image, ImageTk
+from customtkinter import *
+from tkinter import messagebox
 import sqlite3
 import hashlib
 import os
 
-
 class RegisterWindow:
     def __init__(self, username, job_options):
-        # Create the register window
-        self.register_window = Toplevel() # Create window
-        self.register_window.title('Registry') # Change Tittle
-        self.register_window.iconbitmap('Assets/icons/icon.ico') # Change icon
-        self.register_window.configure(bg = '#f0f0f0') # Change the background color
+        self.register_window = CTkToplevel()  # Create CustomTk instance
+        self.register_window.title('Registry')  # Change Title
+        self.register_window.geometry("250x400")
+        self.register_window.resizable(False, False)
         
         self.job_options = job_options
-        
+
         # Connect to a database
         self.conn = sqlite3.connect('User_Data.db')
         self.cursor = self.conn.cursor()
-        
-        # Set the background image
-        try:
-            pil_image = Image.open("Assets/image/RegisterBG.jpg")
-            
-            self.image = ImageTk.PhotoImage(pil_image)
-            img_lbl = Label(self.register_window, image=self.image)
-            img_lbl.place(x=0, y=0, relwidth=1, relheight=1)
-        except FileNotFoundError:
-            print("Arquivo de imagem não encontrado.")
-        except TclError:
-            print("Erro ao carregar a imagem. Verifique se o formato da imagem é suportado.")
-            
-        # Set and Lock window size to match image size
-        self.register_window.geometry(f"{pil_image.width}x{pil_image.height}")
-        self.register_window.minsize(pil_image.width, pil_image.height)
-        self.register_window.maxsize(pil_image.width, pil_image.height)
-        
-        # Create resgister label
-        self.register_lbl = Label(self.register_window, text = 'Set Super User', font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
-        self.register_lbl.grid(row = 0, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
-        
+
+        # Create register label
+        self.register_lbl = CTkLabel(self.register_window, text='Set Super User', fg_color="transparent")
+        self.register_lbl.place(relx=0.5, y=50, anchor='center')
+
         # Create field for username
-        self.username_lbl = Label(self.register_window, text = 'Username', font = 'Arial 14 bold', bg = '#f0f0f0')
-        self.username_lbl.grid(row = 1, column = 0, pady = 20, sticky = 'E')
-        self.username_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0')
-        self.username_entry.grid(row = 1, column = 1, pady = 20, sticky = 'E')
-        
+        self.username_lbl = CTkLabel(self.register_window, text='Username', fg_color="transparent")
+        self.username_lbl.place(relx=0.3, y=100, anchor='e')
+        self.username_entry = CTkEntry(self.register_window)
+        self.username_entry.place(relx=0.4, y=100, anchor='w')
+
         # Create field for password
-        self.password_lbl = Label(self.register_window, text = 'Password', font = 'Arial 14 bold', bg = '#f0f0f0')
-        self.password_lbl.grid(row = 2, column = 0, pady = 20, sticky = 'E')
-        self.password_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
-        self.password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
-        
-        # Check the quary for a SuperUser, Admin or Gerente
+        self.password_lbl = CTkLabel(self.register_window, text='Password', fg_color="transparent")
+        self.password_lbl.place(relx=0.3, y=140, anchor='e')
+        self.password_entry = CTkEntry(self.register_window, show='*')
+        self.password_entry.place(relx=0.4, y=140, anchor='w')
+
+        # Check the query for a SuperUser, Admin or Gerente
         self.cursor.execute("""
             SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
             INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
@@ -61,47 +41,36 @@ class RegisterWindow:
             AND (cargo.cargo_nome='SuperUser' OR cargo.cargo_nome='Admin' OR cargo.cargo_nome='Gerente')
         """, (username,))
         self.result_extra_reg =  self.cursor.fetchone()
-        
+
         if self.result_extra_reg:
-            # Create resgister label
-            self.register_lbl = Label(self.register_window, text = 'Registry', font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
-            self.register_lbl.grid(row = 0, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
-            
             # Create field for age [Make it not show on first creation of superuser]
-            self.age_lbl = Label(self.register_window, text = 'Age', font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.age_lbl.grid(row = 3, column = 0, pady = 20, sticky = 'E')
-            self.age_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.age_entry.grid(row = 3, column = 1, pady = 20, sticky = 'E')
-                
+            self.age_lbl = CTkLabel(self.register_window, text='Age', fg_color="transparent")
+            self.age_lbl.place(relx=0.3, y=180, anchor='e')
+            self.age_entry = CTkEntry(self.register_window)
+            self.age_entry.place(relx=0.4, y=180, anchor='w')
+
             # Create field for address
-            self.address_lbl = Label(self.register_window, text = 'Address', font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.address_lbl.grid(row = 4, column = 0, pady = 20, sticky = 'E')
-            self.address_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0')
-            self.address_entry.grid(row = 4, column = 1, pady = 20, sticky = 'E')
-            
+            self.address_lbl = CTkLabel(self.register_window, text='Address', fg_color="transparent")
+            self.address_lbl.place(relx=0.3, y=220, anchor='e')
+            self.address_entry = CTkEntry(self.register_window)
+            self.address_entry.place(relx=0.4, y=220, anchor='w')
+
             # Create field for job
-            self.job_lbl = Label(self.register_window, text='Job', font='Arial 14 bold', bg='#f0f0f0')
-            self.job_lbl.grid(row=5, column=0, pady=20, sticky='E')
-
-
-            # Variable to store the selected job
-            self.selected_job = StringVar(self.register_window)
-            self.selected_job.set(job_options[0])  # Set default option
+            self.job_lbl = CTkLabel(self.register_window, text='Job', fg_color="transparent")
+            self.job_lbl.place(relx=0.3, y=260, anchor='e')
 
             # Dropdown list widget
-            self.job_option = OptionMenu(self.register_window, self.selected_job, *job_options)
-            self.job_option.config(font = 'Arial 14 bold', bg = '#f0f0f0', width = 15)
-            self.job_option.grid(row = 5, column = 1, pady = 20, sticky = 'E')
-            
+            self.job_option = CTkOptionMenu(self.register_window, values=job_options)
+            self.job_option.place(relx=0.4, y=260, anchor='w')
+
         # Configure a button of register
-        self.register_btn = Button(self.register_window, text = 'Register', font = 'Arial 14', bg = 'cyan', command = self.register_user)
-        self.register_btn.grid(row = 7, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
-        
+        self.register_btn = CTkButton(self.register_window, text='Register', command=self.register_user)
+        self.register_btn.place(relx=0.4, y=300, anchor='center')
+
         # Configure a button of exit
-        self.exit_btn = Button(self.register_window, text = 'Exit', font = 'Arial 14', bg = 'cyan', command = self.register_window.destroy)
-        self.exit_btn.grid(row = 8, column = 1, columnspan = 2, padx = 20, pady = 10, sticky = 'NSEW')
-      
-      
+        self.exit_btn = CTkButton(self.register_window, text='Exit', command=self.register_window.destroy)
+        self.exit_btn.place(relx=0.4, y=340, anchor='center')
+
     def register_user(self):
         # Get inserted data
         user_data = self.username_entry.get()
@@ -109,62 +78,56 @@ class RegisterWindow:
         age_data = ''
         address_data = ''
         job_data = ''
-        
+
         if self.result_extra_reg:
             age_data = self.age_entry.get()
             address_data = self.address_entry.get()
-            job_data = self.job_option.cget('text')
-        
+            job_data = self.job_option.get()
+
         # Generate value of salt
         salt = os.urandom(16)
-        
+
         # generate a hash sha-256
         password_hash = hashlib.pbkdf2_hmac('sha256', password_data.encode('UTF-8'), salt, 100000)
-        
-        # convert password and salt to hexdecimal
+
+        # convert password and salt to hexadecimal
         salt_hex = salt.hex()
         password_hash_hex = password_hash.hex()
-        
+
         # Combine Hashed password with salt
         password_set = f'{salt_hex}:{password_hash_hex}'
 
-        # Check the quary for a Super User
+        # Check the query for a Super User
         self.cursor.execute("""
             SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
             INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
             WHERE cargo.cargo_nome='SuperUser'""")
         result = self.cursor.fetchone()
-        
+
         # Check if SuperUser was inserted
         if result:
             # Query for existing Job
             self.cursor.execute("SELECT id FROM cargo WHERE cargo_nome=?", (job_data,))
             # Retrieve the ID of the existing job
             cargo_id = self.cursor.fetchone()
-            
+
             # Insert a user
             self.cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo_id) VALUES (?, ?, ?, ?, ?)',
-                            (user_data, password_set, age_data, address_data, cargo_id[0]))
+                                (user_data, password_set, age_data, address_data, cargo_id[0]))
+            
+            # Message of successful User registry
+            messagebox.showinfo('Success', 'The Registry was Successfully!')
         else:
             # Insert a user
             self.cursor.execute('INSERT INTO funcionarios (nome, password, idade, morada, cargo_id) VALUES (?, ?, ?, ?, ?)',
-                           (user_data, password_set, age_data, address_data, 1))
-            
+                                (user_data, password_set, age_data, address_data, 1))
+
             # Message of successful SuperUser registry
-            self.message_register_completed = Label(self.register_window, text = 'SuperUser!', fg = 'green')
-            self.message_register_completed.grid(row = 9, column = 0, columnspan = 2)
-        
-        # save to the database
+            messagebox.showinfo('Success', 'SuperUser Set!')
+
+        # Save to the database
         self.conn.commit()
-        
-        # Message of successful User registry
-        self.message_register_completed = Label(self.register_window, text = 'The Registry was Successful!', fg= 'green')
-        self.message_register_completed.grid(row = 6, column = 0, columnspan = 2)
-        self.message_register_completed.after(3000, self.register_window.destroy)
-        
-        
+
     def __del__(self):
         # Close the database connection when the object is destroyed
         self.conn.close()
-        
-        

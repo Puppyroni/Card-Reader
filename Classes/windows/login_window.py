@@ -1,115 +1,82 @@
 # imports
-from tkinter import *
-from PIL import Image, ImageTk
+from customtkinter import *
+from tkinter import messagebox
 import sqlite3
 import hashlib
 # Windows
 from Classes.windows.program_window import ProgramWindow
-
-
+ 
 class LogInWindow:
     def __init__(self):
         # Create the login window
-        self.login_window = Toplevel() # Create window
-        self.login_window.title('Log In') # Change Tittle
-        self.login_window.iconbitmap('Assets/icons/icon.ico') # Change icon
-        self.login_window.configure(bg = '#f0f0f0') # Change the background color
-        
+        self.login_window = CTkToplevel()
+        self.login_window.title('Log In')  # Altere o título
+        self.login_window.geometry("250x200")
+        self.login_window.resizable(False, False)
+       
         # Connect to a database
         self.conn = sqlite3.connect('User_Data.db')
         self.cursor = self.conn.cursor()
         
-        # Set the background image
-        try:
-            pil_image = Image.open("Assets/image/Design sem nome.jpg")
-            
-            self.image = ImageTk.PhotoImage(pil_image)
-            img_lbl = Label(self.login_window, image=self.image)
-            img_lbl.place(x=0, y=0, relwidth=1, relheight=1)
-        except FileNotFoundError:
-            print("Arquivo de imagem não encontrado.")
-        except TclError:
-            print("Erro ao carregar a imagem. Verifique se o formato da imagem é suportado.")
-            
-        # Create login label
-        self.login_lbl = Label(self.login_window, text='Log In', font='Arial 20', fg='#333333', bg='#f0f0f0')
-        self.login_lbl.grid(row=1, column=0, columnspan=2, pady=20, sticky='NSEW')
+        # Create the label for login
+        self.login_lbl = CTkLabel(self.login_window, text='Log In', fg_color="transparent")
+        self.login_lbl.place(relx=0.5, rely=0.1, anchor='center')
+
+        # Create the label and entry field for username
+        self.username_lbl = CTkLabel(self.login_window, text='Username', fg_color="transparent")
+        self.username_lbl.place(relx=0.3, rely=0.3, anchor='e')
+        self.username_entry = CTkEntry(self.login_window)
+        self.username_entry.place(relx=0.4, rely=0.3, anchor='w')  # Adjusted relx
+
+        # Create the label and entry field for password
+        self.password_lbl = CTkLabel(self.login_window, text='Password', fg_color="transparent")
+        self.password_lbl.place(relx=0.3, rely=0.5, anchor='e')
+        self.password_entry = CTkEntry(self.login_window, show='*')
+        self.password_entry.place(relx=0.4, rely=0.5, anchor='w')  # Adjusted relx
+
+        # Configure the login button
+        self.login_btn = CTkButton(self.login_window, text='LogIn', command=self.login_user)
+        self.login_btn.place(relx=0.5, rely=0.7, anchor='center')  # Adjusted rely
+
+        # Configure the exit button
+        self.exit_btn = CTkButton(self.login_window, text='Exit', command=self.login_window.destroy)
+        self.exit_btn.place(relx=0.5, rely=0.9, anchor='center')  # Adjusted rely
         
-        # Create field for username
-        self.username_lbl = Label(self.login_window, text='Username', font='Arial 14 bold', bg='#f0f0f0')
-        self.username_lbl.grid(row=2, column=0, pady=20, sticky='E')
-        self.username_entry = Entry(self.login_window, font='Arial 14 bold', bg='#f0f0f0')
-        self.username_entry.grid(row=2, column=1, pady=20, sticky='E')
-        
-        # Create field for password
-        self.password_lbl = Label(self.login_window, text='Password', font='Arial 14 bold', bg='#f0f0f0')
-        self.password_lbl.grid(row=3, column=0, pady=20, sticky='E')
-        self.password_entry = Entry(self.login_window, font='Arial 14 bold', bg='#f0f0f0', show='*')
-        self.password_entry.grid(row=3, column=1, pady=20, sticky='E')
-        
-        # Configure a button of login
-        self.login_btn = Button(self.login_window, text='LogIn', font='Arial 14', bg='cyan',
-                                command=self.login_user)
-        self.login_btn.grid(row=4, column=0, columnspan=2, pady=10, sticky='NSEW')
-        
-        # Configure a button of exit
-        self.exit_btn = Button(self.login_window, text='Exit', font='Arial 14', bg='cyan', 
-                               command=self.login_window.destroy)
-        self.exit_btn.grid(row=5, column=0, columnspan=2, pady=10, sticky='NSEW')
-        
-        # Centralize all widgets
-        self.centralize_widgets()
-        
-    
-    def centralize_widgets(self):
-        # Center the login window on the screen
-        self.login_window.update_idletasks()
-        width = self.login_window.winfo_width()
-        height = self.login_window.winfo_height()
-        x = (self.login_window.winfo_screenwidth() // 2) - (width // 2)
-        y = (self.login_window.winfo_screenheight() // 2) - (height // 2)
-        self.login_window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
-    
-        
+ 
     def login_user(self):
-        # Get inserted data
+        # Obtenha os dados inseridos
         entered_username = self.username_entry.get()
         entered_password = self.password_entry.get()
-        
-        # Query the database to check if the entered username is correct
+   
+        # Consulte o banco de dados para verificar se o nome de usuário inserido está correto
         self.cursor.execute("SELECT * FROM funcionarios WHERE nome=?", (entered_username,))
         result = self.cursor.fetchone()
-
-        # Check if the entered username is present in the database
+ 
+        # Verifique se o nome de usuário inserido está presente no banco de dados
         if result:
-            # Splits Salt and hash
+            # Divida o salt e o hash
             saved_password = str(result[2])
             salt, saved_password_hash = saved_password.split(':')
-                
-            # Hash the entered password using the same salt
+               
+            # Hash a senha inserida usando o mesmo salt
             hashed_password = hashlib.pbkdf2_hmac('sha256', entered_password.encode('utf-8'), bytes.fromhex(salt), 100000).hex()
-                
-            # Check if the entered password matches the stored hash
+               
+            # Verifique se a senha inserida corresponde ao hash armazenado
             if hashed_password == saved_password_hash:
-            # If credentials are correct, display a success message
-                self.message_login_completed = Label(self.login_window, text='The Log In was Successful!', fg='green')
-                self.message_login_completed.grid(row=3, column=0, columnspan=2)
-                self.message_login_completed.after(1000, self.open_window_program)
+                self.open_window_program()
+                self.login_window.destroy()
                 return
-        
-        # If credentials are incorrect, display an error message
-        self.message_login_completed = Label(self.login_window, text='Invalid username or password', fg='red')
-        self.message_login_completed.grid(row=3, column=0, columnspan=2)
-        
-        
+ 
+        # Se as credenciais estiverem incorretas, exiba uma mensagem de erro
+        messagebox.showerror('Error', 'Invalid username or password')
+ 
     def open_window_program(self):
-        # Get the username inserted in the login window
+        # Obtenha o nome de usuário inserido na janela de login
         entered_username = self.username_entry.get()
-        
-        # Pass the username to the other window
+       
+        # Passe o nome de usuário para a outra janela
         ProgramWindow(entered_username)
-      
-        
+     
     def __del__(self):
-        # Close the database connection when the object is destroyed
+        # Feche a conexão com o banco de dados quando o objeto for destruído
         self.conn.close()

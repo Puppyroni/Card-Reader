@@ -1,25 +1,15 @@
 from customtkinter import *
 from customtkinter import CTk
-from PIL import Image, ImageTk
 import sqlite3
 from Classes.windows.register_window import RegisterWindow
 from Classes.windows.login_window import LogInWindow
-import os
 
 class MainWindow:
     def __init__(self):
-        self.main_window = CTk()  # Create CustomTk instance
+        self.main_window = CTk()
         self.main_window.title('Card Reader')
         self.main_window.geometry("250x200")
-        
-        # Load and set custom icon
-        try:
-            icon_path = 'Assets/icons/icon.ico'
-            self.main_window.iconbitmap(icon_path)
-        except FileNotFoundError as e:
-            print(e)
-        except Exception as e:
-            print('Error setting icon:', e)
+        self.main_window.resizable(False, False)
 
         self.conn = sqlite3.connect('User_Data.db')
         self.cursor = self.conn.cursor()
@@ -42,11 +32,6 @@ class MainWindow:
     
     def open_window_login(self):
         LogInWindow()
-    
+        
     def __del__(self):
         self.conn.close()
-
-# Create instance of MainWindow
-if __name__ == "__main__":
-    mw = MainWindow()
-    mw.main_window.mainloop()

@@ -1,4 +1,6 @@
-from tkinter import *
+from customtkinter import *
+from customtkinter import CTk
+from CTkListbox import *
 import tkinter.simpledialog as spldialog
 from tkinter import messagebox
 import sqlite3
@@ -6,9 +8,19 @@ import sqlite3
 class DataListWindow:
     def __init__(self, username, user_role):
         # Create the main window
-        self.data_list_window = Toplevel()
+        self.data_list_window = CTkToplevel()
         self.data_list_window.title('Data List')
-        self.data_list_window.iconbitmap('Assets/icons/icon.ico')
+        self.data_list_window.resizable(False, False)
+        
+        # Load and set custom icon
+        try:
+            icon_path = 'Assets/icons/icon.ico'
+            self.data_list_window.iconbitmap(icon_path)
+        except FileNotFoundError as e:
+            print(e)
+        except Exception as e:
+            print('Error setting icon:', e)
+        
         self.data_list_window.configure(bg='#f0f0f0')
         
         # Save user role for future reference
@@ -21,72 +33,51 @@ class DataListWindow:
         print(username)
         
         # Configure a button for the list of users
-        self.users_btn = Button(self.data_list_window, text='Users', font='Arial 14', bg='cyan', command=lambda: self.populate_listbox("users"))
+        self.users_btn = CTkButton(self.data_list_window, text='Users', command=lambda: self.populate_listbox("users"))
         self.users_btn.grid(row=0, column=0, columnspan=2, padx=20, pady=20)
         
         # Configure a button for worker's schedule
-        self.schedule_btn = Button(self.data_list_window, text='Schedules', font='Arial 14', bg='cyan', command=lambda: self.populate_listbox("schedules"))
-        self.schedule_btn.grid(row=0, column=1, columnspan=2, padx=20, pady=20)
+        self.schedule_btn = CTkButton(self.data_list_window, text='Schedules', command=lambda: self.populate_listbox("schedules"))
+        self.schedule_btn.grid(row=0, column=2, columnspan=2, padx=20, pady=20)
         
         # Configure a button for worker's schedule
-        self.clocked_in_btn = Button(self.data_list_window, text='Clocked In', font='Arial 14', bg='cyan', command=lambda: self.populate_listbox("clocked in"))
-        self.clocked_in_btn.grid(row=0, column=2, columnspan=2, padx=20, pady=20)
+        self.clocked_in_btn = CTkButton(self.data_list_window, text='Clocked In', command=lambda: self.populate_listbox("clocked in"))
+        self.clocked_in_btn.grid(row=0, column=4, columnspan=2, padx=20, pady=20)
         
         # Configure a button for the list of department
-        self.department_btn = Button(self.data_list_window, text='Department', font='Arial 14', bg='cyan', command=lambda: self.populate_listbox("department"))
-        self.department_btn.grid(row=0, column=4, columnspan=2, padx=20, pady=20)
+        self.department_btn = CTkButton(self.data_list_window, text='Department', command=lambda: self.populate_listbox("department"))
+        self.department_btn.grid(row=0, column=6, columnspan=2, padx=20, pady=20)
         
         # Create a Listbox widget
-        self.data_listbox = Listbox(self.data_list_window, width=50, height=20)
+        self.data_listbox = CTkListbox(self.data_list_window, width=500, height=300)
         self.data_listbox.grid(row=1, column=0, columnspan=6, padx=20, pady=20)
         
         # Create label for user filter
-        self.username_lbl = Label(self.data_list_window, text='Schedule Filter by User:', font='Arial 14 bold', bg='#f0f0f0')
+        self.username_lbl = CTkLabel(self.data_list_window, text='Schedule Filter by User:', fg_color="transparent")
         self.username_lbl.grid(row=2, column=0, pady=20, sticky='E')
         
         # Create a variable to store the selected user
         self.selected_user = StringVar(self.data_list_window)
-        self.selected_user.set('All')  # Set Default to All
-        
-        # Create a dropdown list widget
-        self.user_option = OptionMenu(self.data_list_window, self.selected_user, '')
-        self.user_option.config(font='Arial 14 bold', bg='#f0f0f0', width=15)
-        self.user_option.grid(row=2, column=1, pady=20, sticky='E')
+        self.selected_user.set('All')  # Initialize with empty value
         
         # Check the query for a SuperUser, Admin, or Chief
         self.cursor.execute("""
             SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
             INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
             WHERE funcionarios.nome=? 
-            AND (cargo.cargo_nome='SuperUser' OR cargo.cargo_nome='Admin')
+            AND (cargo.cargo_nome='SuperUser' OR cargo.cargo_nome='Admin' OR cargo.cargo_nome='Gerente')
         """, (username,))
         result_superuser_admin= self.cursor.fetchone()
 
         # Check if the entered username is a SuperUser, Admin, or Chief
         if result_superuser_admin:
-            # Configure a button of 
-            self.rmv_user_sp_admin_btn = Button(self.data_list_window, text = 'Remove User', font = 'Arial 14', bg = 'cyan', command = self.bind_double_click('superuser'))
+            # Configure a button of Remove User
+            self.rmv_user_sp_admin_btn = CTkButton(self.data_list_window, text = 'Remove User', command = self.bind_click)
             self.rmv_user_sp_admin_btn.grid(row = 2, column = 2, columnspan = 2, padx = 20, pady = 10, sticky='E')
             
-            # Configure a button of 
-            self.Schedule_btn = Button(self.data_list_window, text = 'Add Department', font = 'Arial 14', bg = 'cyan', command = self.add_department)
+            # Configure a button of Add Department
+            self.Schedule_btn = CTkButton(self.data_list_window, text = 'Add Department', command = self.add_department)
             self.Schedule_btn.grid(row = 2, column = 4, columnspan = 2, padx = 20, pady = 10, sticky='E')
-        
-        # Check the query for a Chief
-        self.cursor.execute("""
-            SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
-            INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
-            WHERE funcionarios.nome=? 
-            AND cargo.cargo_nome='Gerente'
-        """, (username,))
-        result_maneger= self.cursor.fetchone()
-
-        # Check if the entered username is a chief
-        # Block them for removing SuperUser
-        if result_maneger:
-            # Configure a button of 
-            self.rmv_user_maneger_btn = Button(self.data_list_window, text = 'Remove User', font = 'Arial 14', bg = 'cyan', command = self.bind_double_click('manager'))
-            self.rmv_user_maneger_btn.grid(row = 2, column = 2, columnspan = 2, padx = 20, pady = 10, sticky='E')
         
         # Fetch data from the database and populate the listbox
         self.populate_listbox('users')
@@ -101,40 +92,43 @@ class DataListWindow:
         # Save to the Database
         self.conn.commit()
         
-    
-    def bind_double_click(self, perm):
-        # Define a function to bind the double-click event to the listbox
-        def bind_double_click_event():
-            # Unbind any previously bound double-click events
-            self.data_listbox.unbind('<Double-Button-1>')
-            
-            # Bind the double-click event to the listbox and pass the permission to remove_user method
-            self.data_listbox.bind('<Double-Button-1>', lambda event: self.remove_user(perm))
         
-        return bind_double_click_event
-    
+    def bind_click(self):
+        # Set the command option of the listbox to call the remove_user method
+        self.data_listbox.command = self.remove_user
+        
 
-    def remove_user(self, perm):
-        # This method will be called on double click after the 'Remove User' button is pressed
-        # No need to bind/unbind the event here
-        selected_item = self.data_listbox.get(self.data_listbox.curselection())
-        user_id, username = selected_item.split(' || ')[0], selected_item.split(' || ')[1]
+    def remove_user(self, event=None):
+        # Get the index of the selected item
+        selected_index = self.data_listbox.curselection()
         
-        # Prompt user for confirmation
-        confirmation = messagebox.askyesno("Confirmation", f"Are you sure you want to remove user {username}?")
+        # Check if any item is selected in the listbox and the selected index is not 0
+        if selected_index or selected_index == 0:
+            # If an item is selected and the index is not 0, proceed with removal
+            selected_item = self.data_listbox.get(selected_index)
+            user_id, username = selected_item.split(' || ')[0], selected_item.split(' || ')[1]
             
-        if confirmation:
-            # Quary for the user id
-            self.cursor.execute("SELECT id FROM funcionarios WHERE id=?", (user_id,))
-            result_user = self.cursor.fetchone()
-                
-            # If a user id exists, delete it
-            if result_user:
-                # Delete exit time from the database
-                self.cursor.execute("DELETE FROM funcionarios WHERE id=?", (user_id,))
+            # Prompt user for confirmation
+            confirmation = messagebox.askyesno("Confirmation", f"Are you sure you want to remove user {username}?")
+            if confirmation:
+                # Query for the user id
+                self.cursor.execute("SELECT id FROM funcionarios WHERE id=?", (user_id,))
+                result_user = self.cursor.fetchone()
                     
-                # Save to the database
-                self.conn.commit() 
+                # If a user id exists, delete it
+                if result_user:
+                    # Delete user from the database
+                    self.cursor.execute("DELETE FROM funcionarios WHERE id=?", (user_id,))
+                        
+                    # Save to the database
+                    self.conn.commit()
+                    
+                    # Remove the item from the listbox
+                    self.data_listbox.delete(selected_index)
+        else:
+            # If no item is selected or the selected index is 0, display a message or handle it appropriately
+            messagebox.showinfo("No Selection", "Please select a correct user to remove.")
+
 
     def populate_listbox(self, data_type):
         # Clear the listbox before populating again
@@ -147,16 +141,13 @@ class DataListWindow:
         # Extracting usernames
         user_options = [record[0] for record in user_records]
 
-        # Update the dropdown list with fetched usernames
-        self.user_option['menu'].delete(0, 'end')
-
-        # Add an empty option to list all users
-        self.user_option['menu'].add_command(label='All', command=lambda usr='All': self.selected_user.set(usr))
-
-        # Add the fetched usernames to the dropdown list
-        for user in user_options:
-            self.user_option['menu'].add_command(label=user, command=lambda usr=user: self.selected_user.set(usr))
-        print(self.user_role)
+        # Update the dropdown list with fetched usernames and additional options
+        options = ['All'] + user_options
+        
+        # Recreate the option menu with updated options
+        self.user_option = CTkOptionMenu(self.data_list_window, variable=self.selected_user, values=options)
+        self.user_option.grid(row=2, column=1, pady=20, sticky='E')
+        
         # Filter data based on the selected user
         if self.selected_user.get() == 'All':
             where_condition = ""  # Show all users
@@ -242,7 +233,7 @@ class DataListWindow:
         for row in data:
             # Concatenate the values of desired columns into a single string
             display_text = " || ".join(str(cell) for cell in row)
-            self.data_listbox.insert(END, display_text)
+            self.data_listbox.insert('end', display_text)
 
 
     def __del__(self):
