@@ -15,7 +15,6 @@ class ProgramWindow:
         self.program_window.iconbitmap('Assets/icons/icon.ico')
         self.program_window.configure(bg='#f0f0f0')
         self.program_window.geometry("1000x600")  # Definir o tamanho da janela
-        # self.update_clock() # imposible to work with gives error "AttributeError: 'ProgramWindow' object has no attribute 'clock_lbl'" 
          
         # Connect to a database
         self.conn = sqlite3.connect('User_Data.db')
@@ -25,12 +24,20 @@ class ProgramWindow:
         self.cursor.execute("SELECT * FROM funcionarios WHERE nome=?", (username,))
         result_user = self.cursor.fetchone()
         
-        # Create info field
-        # Name
+        # Create Name label
         self.name_lbl = Label(self.program_window, text = result_user[1], font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
         self.name_lbl.grid(row = 0, column = 0, columnspan = 2, pady = 20, sticky = 'NSEW')
-        # Job
-        self.job_lbl = Label(self.program_window, text = result_user[5], font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
+        
+        # Check the query for a SuperUser, Admin, or Chief
+        self.cursor.execute("""
+            SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
+            INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
+            WHERE funcionarios.nome=?
+        """, (username,))
+        result_user_job = self.cursor.fetchone()
+        
+        # Create job label
+        self.job_lbl = Label(self.program_window, text = result_user_job[6], font = 'Arial 20', fg = '#333333', bg = '#f0f0f0')
         self.job_lbl.grid(row = 0, column = 2, columnspan = 2, pady = 20, sticky = 'NSEW')
         
         # Check the query for a SuperUser, Admin, or Chief
@@ -132,9 +139,10 @@ class ProgramWindow:
     def open_window_data_list(self):
         # Get the username label text in the login window
         username = self.name_lbl.cget('text')
+        job = self.job_lbl.cget('text')
         
         # Pass the username to the other window
-        DataListWindow(username)
+        DataListWindow(username, job)
 
 
     def enter_action(self):

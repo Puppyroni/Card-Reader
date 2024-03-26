@@ -53,12 +53,12 @@ class RegisterWindow:
         self.password_entry = Entry(self.register_window, font = 'Arial 14 bold', bg = '#f0f0f0', show = "*")
         self.password_entry.grid(row = 2, column = 1, pady = 20, sticky = 'E')
         
-        # Check the quary for a SuperUser, Admin or Chief
+        # Check the quary for a SuperUser, Admin or Gerente
         self.cursor.execute("""
             SELECT funcionarios.*, cargo.cargo_nome FROM funcionarios
             INNER JOIN cargo ON funcionarios.cargo_id = cargo.id
             WHERE funcionarios.nome=? 
-            AND (cargo.cargo_nome='SuperUser' OR cargo.cargo_nome='Admin' OR cargo.cargo_nome='Chefe')
+            AND (cargo.cargo_nome='SuperUser' OR cargo.cargo_nome='Admin' OR cargo.cargo_nome='Gerente')
         """, (username,))
         self.result_extra_reg =  self.cursor.fetchone()
         
