@@ -94,11 +94,17 @@ class DataListWindow:
         
         
     def bind_click(self):
-        # Set the command option of the listbox to call the remove_user method
-        self.data_listbox.command = self.remove_user
+        # Define a method to bind the button to remove_user
+        def bind_remove_user(event=None):
+            self.remove_user()
+            self.rmv_user_sp_admin_btn.unbind("<ButtonRelease-1>")
+        
+        # Bind the button to the method defined above using single-click event
+        self.rmv_user_sp_admin_btn.bind("<ButtonRelease-1>", bind_remove_user)
+
         
 
-    def remove_user(self, event=None):
+    def remove_user(self):
         # Get the index of the selected item
         selected_index = self.data_listbox.curselection()
         
@@ -125,6 +131,7 @@ class DataListWindow:
                     
                     # Remove the item from the listbox
                     self.data_listbox.delete(selected_index)
+                    
         else:
             # If no item is selected or the selected index is 0, display a message or handle it appropriately
             messagebox.showinfo("Sem seleção", "Please select a correct user to remove.")
